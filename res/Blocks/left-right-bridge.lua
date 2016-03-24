@@ -1,0 +1,14 @@
+TYPE = 'Block'
+NODE_ID = 'left-right-bridge'
+NAME = 'Block'
+SPRING_TEXTURE = 'res/Blocks/Sp_bridge.png'
+SUMMER_TEXTURE = 'res/Blocks/Su_bridge.png'
+AUTUMN_TEXTURE = 'res/Blocks/Au_bridge.png'
+WINTER_TEXTURE = 'res/Blocks/Wi_bridge.png'
+NODE_FILE = 'res/Blocks/Blocks.gpb'
+BLOCK_TILE_LENGTH = 16
+BODY_TYPE = 'NONE'
+DYNAMIC = false
+SENSOR = false
+BODY_RADIUS = 0.0
+BLOCK_LAYOUT = 'res/Blocks/left-right-bridge-extras.lua'

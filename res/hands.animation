@@ -1,0 +1,17 @@
+animation Hands
+{
+    frameCount = 20
+
+	 clip Close_Hand
+    {
+        begin = 1
+        end = 10
+        repeatCount = 1
+    }
+	 clip Open_Hand
+    {
+        begin = 11
+        end = 20
+        repeatCount = 1
+    }
+}

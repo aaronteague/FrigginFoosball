@@ -1,0 +1,9 @@
+GPB_FILE = "res/Aylott/Aylott.gpb"
+CHARACTER_TEXTURE = "res/Aylott/tex.png"
+CHARACTER_EYE = "res/Aylott/eye-normal.png"
+CHARACTER_MOUTH = "res/Aylott/mouth-happy-partial.png"
+CHARACTER_SHIRT = "res/Pamela/shirt.png"
+LEFT_HAND = "Aylott_Hand_Left"
+RIGHT_HAND = "Aylott_Hand_Right"
+ID = "Aylott"
+JAW = 0

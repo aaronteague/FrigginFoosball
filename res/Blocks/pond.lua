@@ -1,0 +1,14 @@
+TYPE = 'Block'
+NODE_ID = 'Plane'
+NAME = 'Block'
+SPRING_TEXTURE = 'res/Blocks/Sp_pond.png'
+SUMMER_TEXTURE = 'res/Blocks/Su_pond.png'
+AUTUMN_TEXTURE = 'res/Blocks/Au_pond.png'
+WINTER_TEXTURE = 'res/Blocks/Wi_pond.png'
+NODE_FILE = 'res/Blocks/Blocks.gpb'
+BLOCK_TILE_LENGTH = 16
+BODY_TYPE = 'NONE'
+DYNAMIC = false
+SENSOR = false
+BODY_RADIUS = 0.0
+BLOCK_LAYOUT = 'res/Blocks/pond-extras.lua'

@@ -1,0 +1,112 @@
+animation paula
+{
+    frameCount = 792
+    clip Walk
+    {
+        begin =  1
+        end = 29
+        repeatCount = INDEFINITE
+    }
+    clip Run
+    {
+        begin = 31
+        end = 60
+        repeatCount = INDEFINITE
+    }
+    clip Idle
+    {
+        begin = 61
+        end = 168
+        repeatCount = INDEFINITE
+    }
+	clip Harvest_Tree
+	{
+		begin = 169
+		end = 213
+		repeatCount = 1
+	}
+	clip Equip_Item
+    {
+        begin = 214
+        end = 245
+        repeatCount = INDEFINITE
+    }
+	 clip Equip_To_Idle
+    {
+        begin = 246
+        end = 272
+        repeatCount = 1
+    }
+	 clip Dig
+    {
+        begin = 274
+        end = 331
+        repeatCount = 1
+    }
+	clip Step_Back
+	{
+		begin = 332
+		end = 361
+		repeatCount = INDEFINITE
+	}
+	 clip Knock
+    {
+        begin = 362
+        end = 410
+        repeatCount = 1
+    }
+	clip Till
+	{
+		begin = 411
+		end = 490
+		repeatCount = 1
+	}
+	 clip Water
+    {
+        begin = 491
+        end = 569
+        repeatCount = 1
+    }
+	 clip Normal
+    {
+        begin = 570
+        end = 620
+        repeatCount = INDEFINITE
+    }
+	 clip Shy_Trans
+    {
+        begin = 621
+        end = 637
+        repeatCount = 1
+    }
+	 clip Shy
+    {
+        begin = 638
+        end = 686
+        repeatCount = INDEFINITE
+    }
+	 clip Angry_Trans
+    {
+        begin = 687
+        end = 704
+        repeatCount = 1
+    }
+	 clip Angry
+    {
+        begin = 705
+        end = 720
+        repeatCount = INDEFINITE
+    }
+	 clip Happy_Trans
+    {
+        begin = 721
+        end = 753
+        repeatCount = 1
+    }
+	 clip Happy
+    {
+        begin = 754
+        end = 792
+        repeatCount = INDEFINITE
+    }
+}

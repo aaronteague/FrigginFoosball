@@ -1,0 +1,10 @@
+animation powerUp
+{
+    frameCount = 89
+    clip Idle
+    {
+        begin =  1
+        end = 89
+        repeatCount = INDEFINITE
+    }
+    

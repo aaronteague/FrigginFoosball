@@ -1,0 +1,41 @@
+animation opponent
+{
+    frameCount = 139
+
+	 clip Drop_Ball
+    {
+        begin = 1
+        end = 10
+        repeatCount = 1
+    }
+	 clip From_Drop_Ball
+    {
+        begin = 1
+        end = 24
+        repeatCount = 1
+    }
+	 clip Come_In
+    {
+        begin = 25
+        end = 43
+        repeatCount = INDEFINITE
+    }
+	 clip Defeat
+    {
+        begin = 44
+        end = 84
+        repeatCount = 1
+    }
+	 clip Victory
+    {
+        begin = 85
+        end = 109
+        repeatCount = 1
+    }
+	clip Walk
+	{
+		begin = 110
+		end = 139
+		repeatCount = INDEFINITE
+	}
+}

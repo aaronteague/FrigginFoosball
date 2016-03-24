@@ -1,0 +1,6 @@
+GPB_FILE = "res/Pamela/Pamela.gpb"
+CHARACTER_TEXTURE = "res/Pamela/PamelaTex.png"
+CHARACTER_EYE = "res/Pamela/eye-normal.png"
+CHARACTER_MOUTH = "res/Pamela/mouth-happy-partial.png"
+CHARACTER_SHIRT = "res/Pamela/shirt.png"
+ID = "Pamela"

@@ -1,0 +1,18 @@
+FIRST_STRING = "worked"
+SECOND_STRING = "also worked"
+
+FIRST_INT = 70
+SECOND_INT = 71
+
+FIRST_FLOAT = 1.2345
+SECOND_FLOAT = 5.4321
+
+FIRST_BOOL = 1
+SECOND_BOOL = 0
+
+FIRST_TABLE = {}
+SECOND_TABLE = {}
+TABLE = {}
+TABLE["bananaa"] = 7
+TABLE[71] = "banana"
+TABLE['tablec'] = {}

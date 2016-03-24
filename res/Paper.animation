@@ -1,0 +1,12 @@
+animation Paper
+{
+    frameCount = 32
+
+	 clip Fly_In
+    {
+        begin = 1
+        end = 32
+        repeatCount = 1
+    }
+
+}

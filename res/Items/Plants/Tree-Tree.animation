@@ -1,0 +1,18 @@
+animation growing
+{
+    frameCount = 120
+
+    clip Idle
+    {
+        begin = 1
+        end = 90
+        repeatCount = INDEFINITE
+    }
+	clip Action
+	{
+		begin = 91
+		end = 110
+		repeatCount = 1
+	}
+
+}
