@@ -5,6 +5,8 @@
 
 using namespace gameplay;
 
+void showAds();
+
 class StartScreen : public Screen
 {
 public:
@@ -14,6 +16,7 @@ public:
 	void touchEvent(Touch::TouchEvent evt, int x, int y, unsigned int contactIndex);
 
 	void ShowClickToStart();
+
 private:
 	SpriteBatch* splashBatch = NULL;
 	Font* startFont = NULL;

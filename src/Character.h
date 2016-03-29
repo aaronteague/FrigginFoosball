@@ -4,6 +4,7 @@
 #include "gameplay.h"
 
 class Table;
+class LuaLoader;
 
 
 
@@ -11,19 +12,28 @@ class Character : public Entity{
 public:
 	virtual void Update(const float& elapsedTime);
 	void Render();
-	void Clear();
+	
 	void SetPosition(Vector3 newPosition);
-	void WalkToPosition(Vector3 pos, int waitTilFinished);
+	void WalkToPosition(Vector3 pos);
 	void setAnimState(std::string state);
 	void ShowCharacter();
 	virtual Vector3 getLookPosition(){ return node->getTranslationWorld() + Vector3(0,0,10); }
 protected:
+	enum MESH_PARTS
+	{
+		BODY_PART, 
+		SHIRT_PART,
+		EYE_PART,
+		MOUTH_PART
+	};
 	struct AnimSet{
 		int pointA, pointB;
 		AnimationClip *enter, *execute, *exit;
 		AnimationClip *playingClip;
-		AnimSet(AnimationClip* enter, AnimationClip* execute = NULL, AnimationClip* exit = NULL, int pointA = -1, int pointB = -1)
-			: enter(enter), execute(execute), exit(exit), pointA(pointA), pointB(pointB), playingClip(NULL){}
+		Texture::Sampler* mouth;
+		Texture::Sampler* eyes;
+		AnimSet(AnimationClip* enter, AnimationClip* execute = NULL, AnimationClip* exit = NULL, Texture::Sampler* mouth = NULL, Texture::Sampler* eyes = NULL)
+			: enter(enter), execute(execute), exit(exit), eyes(eyes), mouth(mouth), playingClip(NULL){}
 	};
 
 	Vector3 intendedPos; // let's change this to a tween later
@@ -41,7 +51,7 @@ protected:
 	bool belongsToCharacter(int id, Node* bar);
 	
 
-	void setupAnimSetList(Animation* _animation);
+	void setupAnimSetList(Animation* _animation, LuaLoader *loader);
 	void changeAnimSet(int pointA, int pointB);
 	void changeAnimSet(AnimSet* nextAnimState);
 
@@ -50,6 +60,20 @@ protected:
 	void checkForLuaResume();
 
 	Character(Scene* _scene, Table* table);
+
+protected:
+	enum SAMPLERS{
+		E_NEUTRAL,
+		M_NEUTRAL,
+		E_HAPPY,
+		M_HAPPY,
+		E_ANGRY,
+		M_ANGRY
+	};
+	std::string currentFile;
+	std::vector<Texture::Sampler*> samplerList;
+	bool jaw = false;
+	void Clear();
 private:
 	static bool luaBinded;
 	bool pausedLua = false;

@@ -9,6 +9,7 @@ using namespace gameplay;
 
 class Opponent : public Character{
 	friend class Attack;
+	friend class OppAttack;
 public:
 
 	Opponent(Scene* _scene, Table* table);
@@ -18,7 +19,7 @@ public:
 
 	void FadeToHands();
 	void FadeToCharacter();
-
+	void SetDifficulty(float difficulty);
 private:
 	enum FADE_TARGET{
 		NEITHER,
@@ -34,6 +35,19 @@ private:
 		AnimationClip* grabAnim = NULL;
 		AnimationClip* releaseAnim = NULL;
 		AnimationClip* currentAnim = NULL;
+		~Hand()
+		{
+			if (currentAnim->isPlaying())
+				currentAnim->stop();
+			if (grabAnim)grabAnim->release();
+			if (releaseAnim)releaseAnim->release();
+			if (node->getScene())node->getScene()->removeNode(node);
+			node->setEnabled(false);
+	//		node->release();
+			node = NULL; // memory leak....
+			ownedPoles.clear();
+
+		}
 	};
 
 	const float HAND_MOVE_SPEED = 0.3f;
@@ -45,6 +59,7 @@ private:
 	int fadeTarget = NEITHER;
 	float handAlpha = 0;
 	float charAlpha = 1;
+	float difficulty = 1.0f;
 
 	//Node* leftHand = NULL;
 	//Node* rightHand = NULL;
@@ -61,7 +76,8 @@ private:
 
 	bool handOnBar(Node* bar);
 	void moveHandTowardsBar(Node* bar, float elapsedTime);
-	void putHandOnBar(Node* bar);
+	void putHandOnBar(Node* bar, bool immediate = false);
+	
 	
 	Vector3 correctedYTrans(Node* pole);
 	

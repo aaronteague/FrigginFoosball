@@ -4,7 +4,7 @@ animation powerUp
     clip Idle
     {
         begin =  1
-        end = 89
+        end = 88
         repeatCount = INDEFINITE
     }
     

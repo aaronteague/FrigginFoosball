@@ -19,7 +19,7 @@ void CameraFollow::Enter(Entity* camera, FSM* fsm, float& elapsedTime)
 	self->node->setTranslation(self->defaultPos);
 	self->node->setRotation(Matrix::identity());
 	self->node->rotateX(MATH_DEG_TO_RAD(45.46f));
-	self->panSpeed = -1;
+	self->panSpeed = 0;
 	fsm->proceed();
 }
 void CameraFollow::Execute(Entity* camera, FSM* fsm, float& elapsedTime)
@@ -32,6 +32,7 @@ void CameraFollow::Execute(Entity* camera, FSM* fsm, float& elapsedTime)
 	float goalADist = (table->getGoal(1)->getTranslation() - ballPos).length();
 	float goalBDist = (table->getGoal(2)->getTranslation() - ballPos).length();
 
+	if (false) // nix the next few lines
 	if (false && goalADist < ZOOM_DISTANCE){ // zoom into goalA
 		if (curve == NULL){
 			curve = new MyCurve(Curve::LINEAR);

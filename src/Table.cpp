@@ -23,7 +23,7 @@ Table::Table(Scene* _scene, Vector2 screenSize, MyCamera* camera)
 	stateMachine->SetCurrentState(new TableIdle());
 
 	loadSounds();
-
+	powerUp = NULL;
 
 	// bind taht lua
 	luabridge::getGlobalNamespace(L)
@@ -33,6 +33,8 @@ Table::Table(Scene* _scene, Vector2 screenSize, MyCamera* camera)
 		.endClass()
 		.endNamespace();
 }
+
+
 void Table::Update(const float& elapsedTime)
 {
 	if (notify){
@@ -398,9 +400,12 @@ void Table::collisionEvent(PhysicsCollisionObject::CollisionListener::EventType 
 	if (!eitherMatch(pair, ballNode))
 		return;
 
+	const int SCORE_TO_WIN = 10;
+
 	if (eitherMatch(pair, goalA)){
 		p1Score++;
-		if (p1Score < 15){
+		ballNode->setTag("visible", "false");
+		if (p1Score < SCORE_TO_WIN){
 			//luabridge::LuaRef notify = luabridge::getGlobal(L, "notifyScore");
 			
 			MessageDispatcher::Instance()->dispatchMessage(0, this, this, FSM::GOAL_SCORED, goalA);
@@ -415,24 +420,27 @@ void Table::collisionEvent(PhysicsCollisionObject::CollisionListener::EventType 
 			lua_pop(L, 0);
 		}
 		else{
-			MessageDispatcher::Instance()->dispatchMessage(0, this, camera, FSM::GAME_OVER, goalB);
-			luabridge::LuaRef notify = luabridge::getGlobal(L, "notifyGameEnd");
-			notify(1);
-			Table::notify = true;
+			int playerWin = 1;
+			MessageDispatcher::Instance()->dispatchMessage(0, this, this, FSM::GAME_OVER, &playerWin);
+			MessageDispatcher::Instance()->dispatchMessage(0, this, camera, FSM::GAME_OVER, NULL);
+
+			lua_getglobal(L, "notifyGameEnd");
+			lua_pushnumber(L, 1);
+			lua_call(L, 1, 0);
+			lua_pop(L, 0);
+			
 
 		}
 	}
 	else if (eitherMatch(pair, goalB)){
 		p2Score++;
+		ballNode->setTag("visible", "false");
 		
-		
-		if (p2Score < 15){
+		if (p2Score < SCORE_TO_WIN){
 			//luabridge::LuaRef notify = luabridge::getGlobal(L, "notifyScore");
 			
 			
 			MessageDispatcher::Instance()->dispatchMessage(0, this, this, FSM::GOAL_SCORED, goalB);
-			//notify(2, p2Score);
-			//Table::notify = true;
 
 			lua_getglobal(L, "notifyScore");
 			lua_pushnumber(L, 2);
@@ -442,11 +450,14 @@ void Table::collisionEvent(PhysicsCollisionObject::CollisionListener::EventType 
 			lua_pop(L, 0);
 		}
 		else{
-			MessageDispatcher::Instance()->dispatchMessage(0, this, camera, FSM::GAME_OVER, goalB);
-			luabridge::LuaRef notify = luabridge::getGlobal(L, "notifyGameEnd");
-			notify(2);
-			Table::notify = true;
-			
+			int playerWin = 2;
+			MessageDispatcher::Instance()->dispatchMessage(0, this, this, FSM::GAME_OVER, &playerWin);
+			MessageDispatcher::Instance()->dispatchMessage(0, this, camera, FSM::GAME_OVER, NULL);
+
+			lua_getglobal(L, "notifyGameEnd");
+			lua_pushnumber(L, 2);
+			lua_call(L, 1, 0);
+			lua_pop(L, 0);
 		}
 	}
 	else if (eitherMatch(pair, fieldNode)){
@@ -541,7 +552,9 @@ bool Table::hasHitSides(const PhysicsRigidBody::CollisionPair& pair)
 
 void Table::Load(std::string file)
 {
-	
+	if (tableNode)
+		return; // return if table has been loaded previously
+
 	LuaLoader loader(L);
 	loader.setFile(file);
 
@@ -551,7 +564,7 @@ void Table::Load(std::string file)
 	boxModel->setMaterial(buildMaterial(_scene, Texture::create(tableTex.c_str()), TEXTURED_SPECULAR, true, -1));
 
 	Node* tempNode;
-	PhysicsRigidBody::Parameters params(0.0f, 1.0, 0.7f, 1.0f, 1.0f, false);
+	PhysicsRigidBody::Parameters params(0.0f, 1.0, 1.0f, 1.0f, 1.0f, false);
 
 	tempNode = _scene->addNode();
 	tempNode->setCollisionObject(PhysicsCollisionObject::RIGID_BODY, PhysicsCollisionShape::box(Vector3(14.6f, 1.0f, 4.0f), Vector3(0, 4.3f, 2.0f), true), &params); // top
@@ -607,7 +620,7 @@ void Table::Load(std::string file)
 
 	// load up the ball
 	ballNode = _scene->findNode("Ball");
-
+	ballNode->setTag("visible", "false");
 	ballEmitter = ParticleEmitter::create("res/particle.particle");
 	Node* emitterNode = Node::create("emitter");
 	//_scene->addNode(emitterNode);
@@ -661,7 +674,7 @@ void Table::Load(std::string file)
 			child = child->getNextSibling();
 			if (child == NULL)
 				break;
-
+			
 			((gameplay::Model*)child->getDrawable())->setMaterial(buildMaterial(_scene, NULL, COLORED, false, -1));
 			child->setCollisionObject(PhysicsCollisionObject::RIGID_BODY, PhysicsCollisionShape::sphere(0.2f, Vector3::zero(), true), &manParam);
 			child->getCollisionObject()->addCollisionListener(this);
@@ -702,10 +715,39 @@ void Table::Load(std::string file)
 
 }
 
+Table::~Table()
+{
+//	SAFE_DELETE(shadowBatch);
+//	font->release();
+//	delete(stateMachine);
+//	for (unsigned int i = 0; i < soundEffects.size(); ++i)
+//	if (soundEffects[i])
+//		soundEffects[i]->release();
+//	delete(powerUp);
+	
+//	_scene->visit(this, &Table::removePhysObjects);
+
+}
+
+bool Table::removePhysObjects(Node* node)
+{
+	PhysicsCollisionObject *object = node->getCollisionObject();
+	
+	if (!object)return true;
+
+//	object->removeCollisionListener(this);
+//	delete(object);
+	object->setEnabled(false);
+//	node->release();
+	return true;
+}
+
 void Table::Clear()
 {
 	p1Score = p2Score = 0;
 	showScore = false;
+	if (powerUp)
+		powerUp->Clear();
 }
 
 int Table::getOwner(Node* man)
@@ -765,7 +807,15 @@ void Table::checkScriptCallbacks(const float& elapsedTime)
 			// send the signal
 			lua_getglobal(L, "notifyNearGoal");
 			lua_pushnumber(L, 1); // player ones' goal
-			lua_call(L, 1, 0);
+			try{
+				
+				lua_call(L, 1, 0);
+			}
+			catch (std::exception &e){
+				std::string error = e.what();
+				GP_ERROR(error.c_str());
+			}
+			
 			lua_pop(L, 0);
 			
 		}
@@ -779,7 +829,13 @@ void Table::checkScriptCallbacks(const float& elapsedTime)
 			// send the signal
 			lua_getglobal(L, "notifyNearGoal");
 			lua_pushnumber(L, 2); // player two's goal
-			lua_call(L, 1, 0);
+			try{
+				lua_call(L, 1, 0);
+			}
+			catch (std::exception &e){
+				std::string error = e.what();
+				GP_ERROR(error.c_str());
+			}
 			lua_pop(L, 0);
 		}
 	}
@@ -793,7 +849,7 @@ void Table::checkScriptCallbacks(const float& elapsedTime)
 	if (roundTimer > LONG_ASS_TIME){
 		roundTimer = 0;
 		lua_getglobal(L, "notifyLongTime");
-		lua_call(L, 0, 0);  // takes none, returns none
+//		lua_call(L, 0, 0);  // takes none, returns none
 
 	}
 }

@@ -17,7 +17,11 @@ public:
 
 	~OverMap();
 private:
-
+	enum SOUND
+	{
+		DING,
+		PAPER
+	};
 
 	struct Level{
 		Vector2 pos;

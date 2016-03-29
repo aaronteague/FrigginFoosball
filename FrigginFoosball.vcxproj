@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="DebugMem|x64">
       <Configuration>DebugMem</Configuration>
@@ -24,20 +24,20 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugMem|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -70,14 +70,14 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;GP_USE_GAMEPAD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\GamePlay-master\gameplay\src;..\..\GamePlay-master\external-deps\include;$(MSBuildProgramFiles32)\Microsoft DirectX SDK (June 2010)\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\Java\jdk1.7.0_09\include\win32;C:\Program Files\Java\jdk1.7.0_09\include;..\..\GamePlay-master\gameplay\src;..\..\GamePlay-master\external-deps\include;$(MSBuildProgramFiles32)\Microsoft DirectX SDK (June 2010)\include</AdditionalIncludeDirectories>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>OpenGL32.lib;GLU32.lib;gameplay.lib;gameplay-deps.lib;XInput.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>OpenGL32.lib;GLU32.lib;gameplay.lib;gameplay-deps.lib;XINPUT9_1_0.LIB;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\GamePlay-master\external-deps\lib\windows\x86_64\Debug;..\..\GamePlay-master\gameplay\Debug;$(MSBuildProgramFiles32)\Microsoft DirectX SDK (June 2010)\Lib\x64</AdditionalLibraryDirectories>
     </Link>
     <CustomBuildStep>
@@ -141,7 +141,7 @@ xcopy ..\..\GamePlay-master\gameplay\res\ui res\ui\* /s /y /d</Command>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>OpenGL32.lib;GLU32.lib;gameplay.lib;gameplay-deps.lib;XInput.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>OpenGL32.lib;GLU32.lib;gameplay.lib;gameplay-deps.lib;XINPUT9_1_0.LIB;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\GamePlay-master\external-deps\lib\windows\x86_64\Release;..\..\GamePlay-master\gameplay\Release;$(MSBuildProgramFiles32)\Microsoft DirectX SDK (June 2010)\Lib\x64</AdditionalLibraryDirectories>
     </Link>
     <CustomBuildStep>
@@ -197,15 +197,23 @@ xcopy ..\..\GamePlay-master\gameplay\res\ui res\ui\* /s /y /d</Command>
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\PowerUp.cpp" />
     <ClCompile Include="src\Screen.cpp" />
+    <ClCompile Include="src\Screens\AboutScreen.cpp" />
+    <ClCompile Include="src\Screens\AdvertScreen.cpp" />
+    <ClCompile Include="src\Screens\CreditsScreen.cpp" />
+    <ClCompile Include="src\Screens\DifficultySet.cpp" />
     <ClCompile Include="src\Screens\FoosballScreen.cpp" />
     <ClCompile Include="src\Screens\LogoSwoop.cpp" />
+    <ClCompile Include="src\Screens\MainMenu.cpp" />
     <ClCompile Include="src\Screens\OverMap.cpp" />
+    <ClCompile Include="src\Screens\Pause.cpp" />
+    <ClCompile Include="src\Screens\ShutterScreen.cpp" />
     <ClCompile Include="src\Screens\StartScreen.cpp" />
     <ClCompile Include="src\State.cpp" />
     <ClCompile Include="src\States\Attack.cpp" />
     <ClCompile Include="src\States\CameraFollow.cpp" />
     <ClCompile Include="src\States\CameraOvermap.cpp" />
     <ClCompile Include="src\States\CameraStage.cpp" />
+    <ClCompile Include="src\States\OppAttack.cpp" />
     <ClCompile Include="src\States\TableIdle.cpp" />
     <ClCompile Include="src\Table.cpp" />
   </ItemGroup>
@@ -238,15 +246,23 @@ xcopy ..\..\GamePlay-master\gameplay\res\ui res\ui\* /s /y /d</Command>
     <ClInclude Include="src\Player.h" />
     <ClInclude Include="src\PowerUp.h" />
     <ClInclude Include="src\Screen.h" />
+    <ClInclude Include="src\Screens\AboutScreen.h" />
+    <ClInclude Include="src\Screens\AdvertScreen.h" />
+    <ClInclude Include="src\Screens\CreditsScreen.h" />
+    <ClInclude Include="src\Screens\DifficultySet.h" />
     <ClInclude Include="src\Screens\FoosballScreen.h" />
     <ClInclude Include="src\Screens\LogoSwoop.h" />
+    <ClInclude Include="src\Screens\MainMenu.h" />
     <ClInclude Include="src\Screens\OverMap.h" />
+    <ClInclude Include="src\Screens\Pause.h" />
+    <ClInclude Include="src\Screens\ShutterScreen.h" />
     <ClInclude Include="src\Screens\StartScreen.h" />
     <ClInclude Include="src\State.h" />
     <ClInclude Include="src\States\Attack.h" />
     <ClInclude Include="src\States\CameraFollow.h" />
     <ClInclude Include="src\States\CameraOvermap.h" />
     <ClInclude Include="src\States\CameraStage.h" />
+    <ClInclude Include="src\States\OppAttack.h" />
     <ClInclude Include="src\States\TableIdle.h" />
     <ClInclude Include="src\Table.h" />
   </ItemGroup>

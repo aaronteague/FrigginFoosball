@@ -1,8 +1,11 @@
 #include "Announcer.h"
 #include "Dependencies\LuaBridge\LuaBridge.h"
 
+bool Announcer::luaBinded = false;
+
 Announcer::Announcer()
 {
+	if (!luaBinded)
 	luabridge::getGlobalNamespace(L)
 		.beginNamespace("announcer")
 		.beginClass<Announcer>("Announcer")
@@ -11,6 +14,7 @@ Announcer::Announcer()
 		.endClass()
 		.endNamespace();
 
+	luaBinded = true;
 	audioFiles.resize(10);
 	
 }

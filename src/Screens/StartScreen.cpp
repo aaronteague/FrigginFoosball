@@ -1,5 +1,10 @@
 #include "StartScreen.h"
 #include "../Dependencies\LuaBridge\LuaBridge.h"
+//#include "../advert.h"
+
+
+
+
 
 bool StartScreen::luaBinded = false;
 
@@ -16,17 +21,20 @@ StartScreen::StartScreen(Vector2 screenSize)
 			.endClass();
 	}
 	luaBinded = true;
+
+//	Advert::CallJava(Advert::LOAD_INTERSTITIAL);
 }
 
 void StartScreen::Update(const float& elapsedTime)
 {
-
+//	if (startFont)
+//		Advert::CallJava(Advert::SHOW_AD);
 }
 void StartScreen::Render()
 {
 	if (splashBatch){ // splash
 		splashBatch->start();
-		splashBatch->draw(gameplay::Rectangle(0, 0, screenSize.x, screenSize.y), gameplay::Rectangle(0, 0, 2048, 1024));
+		splashBatch->draw(gameplay::Rectangle(0, 0, screenSize.x, screenSize.y), gameplay::Rectangle(0, 0, 1024, 512));
 		splashBatch->finish();
 	}
 
@@ -39,6 +47,7 @@ void StartScreen::Render()
 void StartScreen::touchEvent(Touch::TouchEvent evt, int x, int y, unsigned int contactIndex)
 {
 	if (startFont && evt == Touch::TOUCH_PRESS){
+		playSound(0);
 		luabridge::LuaRef resume = luabridge::getGlobal(L, "resume");
 		resume();
 	}
@@ -47,4 +56,6 @@ void StartScreen::touchEvent(Touch::TouchEvent evt, int x, int y, unsigned int c
 void StartScreen::ShowClickToStart()
 {
 	startFont = Font::create("res/arial.gpb");
+	loadSound(0, "res/sounds/ping.wav");
 }
+

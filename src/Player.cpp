@@ -8,11 +8,11 @@ Player::Player(Scene *_scene, Table* table, MyCamera* camera)
 :Character(_scene, table)
 {
 	luabridge::getGlobalNamespace(L)
-		.beginNamespace("player")
+		//	.beginNamespace("player")
 		.deriveClass<Player, Character>("Player")
 		.addFunction("Load", &Player::Load)
-		.endClass()
-		.endNamespace();
+		.endClass();
+	//	.endNamespace();
 
 	node = NULL;
 	Player::camera = camera;
@@ -21,6 +21,14 @@ Player::Player(Scene *_scene, Table* table, MyCamera* camera)
 
 void Player::Load(std::string file)
 {
+	if (node && file.compare(currentFile) == 0)
+		return; // no change, just leave it
+
+	if (node)
+		Clear();
+		
+	
+
 	LuaLoader loader(L);
 	loader.setFile(file);
 
@@ -35,22 +43,22 @@ void Player::Load(std::string file)
 	node = characterBundle->loadNode(id.c_str());
 
 	std::string textureFile = loader.getString("CHARACTER_TEXTURE");
-	((Model*)node->getDrawable())->setMaterial(buildMaterial(_scene, Texture::create(textureFile.c_str(), true), TEXTURED_ANIMATED, false, 40), 0);
+	((Model*)node->getDrawable())->setMaterial(buildMaterial(_scene, Texture::create(textureFile.c_str(), true), TEXTURED_ANIMATED, false, 50), 0);
 	std::string shirtFile = loader.getString("CHARACTER_SHIRT");
-	((Model*)node->getDrawable())->setMaterial(buildMaterial(_scene, Texture::create(shirtFile.c_str(), true), TEXTURED_ANIMATED, false, 40), 1);
-	std::string eyeFile = loader.getString("CHARACTER_EYE");
-	((Model*)node->getDrawable())->setMaterial(buildMaterial(_scene, Texture::create(eyeFile.c_str(), true), TEXTURED_ANIMATED, false, 40), 2);
-	std::string mouthFile = loader.getString("CHARACTER_MOUTH");
-	((Model*)node->getDrawable())->setMaterial(buildMaterial(_scene, Texture::create(mouthFile.c_str(), true), TEXTURED_ANIMATED, false, 40), 3);
+	((Model*)node->getDrawable())->setMaterial(buildMaterial(_scene, Texture::create(shirtFile.c_str(), true), TEXTURED_ANIMATED, false, 50), 1);
+	std::string eyeFile = loader.getString("EYE_NEUTRAL");
+	((Model*)node->getDrawable())->setMaterial(buildMaterial(_scene, Texture::create(eyeFile.c_str(), true), TEXTURED_ANIMATED, false, 50), 2);
+	std::string mouthFile = loader.getString("MOUTH_NEUTRAL");
+	((Model*)node->getDrawable())->setMaterial(buildMaterial(_scene, Texture::create(mouthFile.c_str(), true), TEXTURED_ANIMATED, false, 50), 3);
 	Animation* _animation = node->getAnimation("animations");
 	_animation->createClips("res/animation.animation");
 
-	setupAnimSetList(_animation);
+	setupAnimSetList(_animation, &loader);
 
 //	_scene->addNode(node);
 	characterBundle->release();
 
-	
+	node->rotateZ(MATH_DEG_TO_RAD(180));
 
 	
 }
@@ -62,16 +70,20 @@ void Player::Update(const float& elapsedTime)
 
 	updateAnimation();
 	checkForLuaResume();
-	float distance = (camera->getNode()->getTranslation() - node->getTranslation() + Vector3(0, 0, 12)).length();
-	if (camera->getNode()->getTranslation().y < node->getTranslation().y
-		&& node->getScene() != NULL)
-		_scene->removeNode(node);
+	//float distance = (camera->getNode()->getTranslation() - node->getTranslation() + Vector3(0, 0, 12)).length();
+	//if (camera->getNode()->getTranslation().y < node->getTranslation().y
+	//	&& node->getScene() != NULL)
+	//	_scene->removeNode(node);
 
-	//	((Model*)node->getDrawable())->getMaterial()->getParameter("u_modulateAlpha")->setFloat(0.0f);
-	else if (camera->getNode()->getTranslation().y >= node->getTranslation().y
-		&& node->getScene() == NULL)
-		_scene->addNode(node);
+	//else if (camera->getNode()->getTranslation().y >= node->getTranslation().y
+	//	&& node->getScene() == NULL)
+	//	_scene->addNode(node);
 
-		//((Model*)node->getDrawable())->getMaterial()->getParameter("u_modulateAlpha")->setFloat(1.0f);
+	
 
+}
+
+void Player::FadeToCharacter()
+{
+	_scene->addNode(node);
 }

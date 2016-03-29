@@ -17,7 +17,7 @@ class MyCamera : public Entity{
 public:
 	/** constructor*/
 	MyCamera(Scene* _scene, float screenWidth, float screenHeight);
-
+	~MyCamera() {}
 	/** converts position from screen space to world space, colliding with ground plane
 	@param itemToCheck we are about to remove this parameter
 	@param touchPosition the position the finger touches onto the screen*/
@@ -34,7 +34,7 @@ public:
 	@param y screen touched y-axis*/
 	bool isTouching(Node* node, int x, int y, const float radius);
 
-	/** updats the logic*/
+	/** updates the logic*/
 	virtual void Update(const float& elapsedTime);
 
 	/** sets the target node to follow*/
@@ -48,7 +48,7 @@ public:
 	void PeekUp(int milliseconds);
 	void ZoomIntoTarget(int milliseconds);
 
-	float panSpeed = -1;
+	float panSpeed = 0;
 	float panRadius = -1;
 	float curAngle;
 

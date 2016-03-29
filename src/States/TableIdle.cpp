@@ -22,8 +22,8 @@ void TableIdle::Execute(Entity* table, FSM* fsm, float& elapsedTime)
 		self->showScore = false;
 		self->isRunning = true;
 		floating = false;
-		float x = (rand() % 100) / 100.0f - 0.5f;
-		float y = (rand() % 100) / 100.0f - 0.5f;
+		float x = (rand() % 100) / 100.0f - 1.0f;
+		float y = (rand() % 100) / 100.0f - 1.0f;
 		self->ballNode->setTranslation(0, 0, 5);
 		((PhysicsRigidBody*)self->ballNode->getCollisionObject())->setKinematic(false);
 		((PhysicsRigidBody*)self->ballNode->getCollisionObject())->applyImpulse(Vector3(x * 5, y * 5, 0));
@@ -49,6 +49,7 @@ void TableIdle::Execute(Entity* table, FSM* fsm, float& elapsedTime)
 	if (powerupTimer >= 0)
 		powerupTimer += elapsedTime;
 
+	const float POWERUP_TIMER = 10000; // 10 seconds
 	if (powerupTimer > POWERUP_TIMER){
 		if (powerUpItem){
 			self->_scene->removeNode(powerUpItem);
@@ -105,6 +106,9 @@ void TableIdle::Exit(Entity* table, FSM* fsm, float& elapsedTime)
 }
 void TableIdle::OnMessage(Entity* table, Telegram& telegram, FSM* fsm)
 {
+	if (!self)
+		self = (Table*)table;
+
 	PhysicsRigidBody* body = (PhysicsRigidBody*)self->ballNode->getCollisionObject();
 	switch (telegram.msg){
 	case FSM::GOAL_SCORED:
@@ -114,7 +118,18 @@ void TableIdle::OnMessage(Entity* table, Telegram& telegram, FSM* fsm)
 		self->isRunning = false;
 		
 		break;
+	case FSM::GAME_OVER:
+		body->setKinematic(true);
+		self->ballNode->setTranslation(0, 0, 5);
+		self->isRunning = false;
+		self->setSound(Table::BALL_ROLL, false);
+
+		// save one more in progress if win
+
+		break;
 	case FSM::START_ROUND:
+	//	self->_scene->addNode(self->ballNode);
+		self->ballNode->setTag("visible", "true");
 		self->showScore = true;
 		self->ballNode->setTranslation(0, 0, 5);
 		floating = true;
@@ -161,10 +176,11 @@ void TableIdle::OnMessage(Entity* table, Telegram& telegram, FSM* fsm)
 
 void TableIdle::notifyPowerReceived(std::string message, int owner)
 {
-	lua_getglobal(L, "notifyNearGoal");
+	lua_getglobal(L, "notifyPowerup");
 	lua_pushstring(L, message.c_str()); // player two's goal
 	lua_pushnumber(L, owner);
 	lua_call(L, 2, 0);
+	
 	lua_pop(L, 0);
 	lua_pop(L, 0);
 }

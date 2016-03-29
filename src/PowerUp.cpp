@@ -33,6 +33,9 @@ PowerUp::PowerUp(Scene* _scene, Table* table, Node* ball)
 
 	tex->release();
 	bundle->release();
+
+	receivedSound = AudioSource::create("res/sounds/ping.wav");
+	spawnedSound = AudioSource::create("res/sounds/ping.wav");
 }
 void PowerUp::Update(const float& elapsedTime)
 {
@@ -44,9 +47,11 @@ void PowerUp::Update(const float& elapsedTime)
 		removableObject = NULL;
 	}
 
-	timer += elapsedTime;
+	if (elapsedTime < 100.0f && !currentFieldItem)
+		timer += elapsedTime;
 
-	if (timer >= 5000){
+	float SPAWN_TIME = 20000; // 20 seconds
+	if (timer >= SPAWN_TIME){
 		timer = 0;
 		if (!currentFieldItem)
 			spawnItem();
@@ -85,6 +90,7 @@ void PowerUp::collisionEvent(PhysicsCollisionObject::CollisionListener::EventTyp
 
 		
 		_scene->removeNode(currentFieldItem);
+		receivedSound->play();
 		removableObject = currentFieldItem;
 		currentFieldItem = NULL;
 		//if (removableObject == NULL)
@@ -98,9 +104,10 @@ void PowerUp::collisionEvent(PhysicsCollisionObject::CollisionListener::EventTyp
 
 void PowerUp::spawnItem()
 {
+
 	srand(Game::getAbsoluteTime());
 	int index = MATH_RANDOM_0_1() * 3;
-	currentFieldItem = powerList[0];
+	currentFieldItem = powerList[index];
 	_scene->addNode(currentFieldItem);
 
 	currentFieldItem->setTranslationZ(0);
@@ -109,11 +116,22 @@ void PowerUp::spawnItem()
 	float y = MATH_RANDOM_0_1() * fieldLength - fieldLength / 2.0f;
 	currentFieldItem->setTranslationY(y);
 
-	Animation* anim = currentFieldItem->getAnimation();
+	Animation* anim = currentFieldItem->getAnimation("animations");
 	anim->createClips("res/powerUp.animation");
-	anim->getClip("Idle")->play();
+	animClip = anim->getClip("Idle");
+	animClip->play();
+	spawnedSound->play();
+	anim->release();
 
 	currentFieldItem->setCollisionObject(PhysicsCollisionObject::GHOST_OBJECT, PhysicsCollisionShape::sphere(0.3f, Vector3::zero(), true));
 	currentFieldItem->getCollisionObject()->setEnabled(true);
 	currentFieldItem->getCollisionObject()->addCollisionListener(this);
+}
+
+void PowerUp::Clear()
+{
+	if (currentFieldItem)
+		removableObject = currentFieldItem;
+		
+	timer = 0;
 }

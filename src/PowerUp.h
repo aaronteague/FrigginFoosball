@@ -15,6 +15,8 @@ public:
 	void collisionEvent(PhysicsCollisionObject::CollisionListener::EventType type,
 		const PhysicsRigidBody::CollisionPair& pair,
 		const Vector3& pointA, const Vector3& pointB);
+
+	void Clear();
 private:
 	enum Power{
 		SPEED,
@@ -23,9 +25,9 @@ private:
 	};
 	std::vector<Node*> powerList;
 	Node* currentFieldItem = NULL;
-	Scene* _scene;
+	Scene* _scene = NULL;
 	float timer = 0;
-	float SPAWN_TIME = 20000; // 20 seconds
+	
 	float fieldWidth = 11;
 	float fieldLength = 7;
 
@@ -34,7 +36,10 @@ private:
 	Node* wall;
 	Node* emitNode;
 	Node* removableObject = NULL;
+	AnimationClip *animClip = NULL;
 	
+	AudioSource* receivedSound;
+	AudioSource* spawnedSound;
 
 	void spawnItem();
 };

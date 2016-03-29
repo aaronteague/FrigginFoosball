@@ -1,41 +1,47 @@
 animation opponent
 {
-    frameCount = 139
+    frameCount = 547
 
-	 clip Drop_Ball
+	 clip Walk
     {
-        begin = 1
-        end = 10
-        repeatCount = 1
-    }
-	 clip From_Drop_Ball
-    {
-        begin = 1
-        end = 24
-        repeatCount = 1
-    }
-	 clip Come_In
-    {
-        begin = 25
-        end = 43
+        begin = 0
+        end = 35
         repeatCount = INDEFINITE
     }
-	 clip Defeat
+	 clip Wave
     {
-        begin = 44
-        end = 84
+        begin = 36
+        end = 92
+        repeatCount = INDEFINITE
+    }
+	 clip Happy
+    {
+        begin = 93
+        end = 149
+        repeatCount = 1
+    }
+	 clip Angry
+    {
+        begin = 150
+        end = 197
         repeatCount = 1
     }
 	 clip Victory
     {
-        begin = 85
-        end = 109
+        begin = 198
+        end = 270
         repeatCount = 1
     }
-	clip Walk
+	clip Defeat
 	{
-		begin = 110
-		end = 139
+		begin = 271
+		end = 478
+		repeatCount = 1
+	}
+	clip Idle
+	{
+		begin = 479
+		end = 546
 		repeatCount = INDEFINITE
 	}
 }

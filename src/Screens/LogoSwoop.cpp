@@ -3,7 +3,7 @@
 #include "../Dependencies/LuaBridge/LuaBridge.h"
 
 LogoSwoop::LogoSwoop(Vector2 screenSize, int milliseconds)
-:screenSize(screenSize), running(true)
+:screenSize(screenSize)
 {
 	logoBatch = SpriteBatch::create("res/Logo.png");
 	starBackBatch = SpriteBatch::create("res/stars.png");
@@ -23,7 +23,7 @@ LogoSwoop::LogoSwoop(Vector2 screenSize, int milliseconds)
 
 	starAlpha = 0.1f;
 	starOffset.set(-512, -512);
-	//running = true;
+	
 }
 void LogoSwoop::Update(const float& elapsedTime)
 {
@@ -46,7 +46,7 @@ void LogoSwoop::Update(const float& elapsedTime)
 	else{
 		starAlpha -= 0.1f;
 		if (starAlpha <= 0.0f){
-			running = false;
+			isFinished = true;
 			luabridge::LuaRef resume = luabridge::getGlobal(L, "resume");
 			resume();
 		}
@@ -66,8 +66,8 @@ void LogoSwoop::Render()
 		starBackBatch->finish();
 
 		logoBatch->start();
-		logoBatch->draw(gameplay::Rectangle(topX, 0, screenSize.x, screenSize.y / 2), gameplay::Rectangle(0, 0, 1917, 555));
-		logoBatch->draw(gameplay::Rectangle(bottomX, screenSize.y / 2, screenSize.x, screenSize.y / 2), gameplay::Rectangle(0, 555, 1917, 525));
+		logoBatch->draw(gameplay::Rectangle(topX, 0, screenSize.x, screenSize.y / 2), gameplay::Rectangle(0, 0, 1917, 528));
+		logoBatch->draw(gameplay::Rectangle(bottomX, screenSize.y / 2, screenSize.x, screenSize.y / 2), gameplay::Rectangle(0, 555, 1917, 527));
 		logoBatch->finish();
 	}
 }

@@ -32,7 +32,9 @@ void CameraStage::Exit(Entity* camera, FSM* fsm, float& elapsedTime)
 }
 void CameraStage::OnMessage(Entity* camera, Telegram& telegram, FSM* fsm)
 {
-	self->panSpeed = self->panRadius = -1;
+	if (!self)
+		self = (MyCamera*)camera;
+	self->panSpeed = self->panRadius = 0;
 
 	switch (telegram.msg){
 	case FSM::START_ROUND:

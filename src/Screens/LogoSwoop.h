@@ -13,7 +13,7 @@ public:
 	void Render();
 	void touchEvent(Touch::TouchEvent evt, int x, int y, unsigned int contactIndex);
 
-	bool isFinished(){ return !running; }
+	
 private:
 	MyCurve* logoTop = NULL;
 	MyCurve* logoBottom = NULL;
@@ -25,5 +25,5 @@ private:
 	float bottomX;
 
 	Vector2 screenSize;
-	bool running;
+	
 };

@@ -1,10 +1,12 @@
-opponentStartPos = Vector3(2.1505 ,15.77164, -6.69674)
+opponentStartPos = Vector3(2.150 ,15.771, -6.696)
 opponentPlayPos = Vector3(2.1505 ,9.76, -6.69674)
+playerStartPos = Vector3(-2.427 ,-16.092, -6.334)
 playerPlayPos = Vector3(-2.427 ,-10.092, -6.334)
 tableCamOffset = Vector3(-20, -0.77, 15.1)
 opponentCamOffset = Vector3(-17.983, 7.393, 13.749)
+opponentStartCamOffset = Vector3(-17.983, 7.393, 13.749)
 playerCamOffset = Vector3(-0.983, 10.168, 9.749)
-
+playerStartCamOffset = Vector3(-0.983, 10.168, 9.749)
 
 playerScoreEvents = {}
 opponentScoreEvents = {}
@@ -74,19 +76,29 @@ function notifyScore(characterID, score)
 end
 
  function notifyGameEnd(winningCharacter)
+	func = nil
   if winningCharacter == 1 then
-   p1WinFunc()
+   func = p1WinFunc
   elseif winningCharacter == 2 then
-   p2WinFunc()
+   func = p2WinFunc
   end
- GAME:SaveProgress(1, 1)
-  GAME:ShowOverMap()
+  
+  if func ~= nil then
+   co = coroutine.create(func)
+   coroutine.resume(co)
+  else
+   GAME:ShowOverMap()
+  end
+ --GAME:SaveProgress(1, 1)
+  
  end
  
  function notifyLongTime()
   func = nil
-  index = math.random(#longRunTimeFuncs)
-  func = longRunTimeFuncs[index]
+  if longRunTimeFuncs[1] ~= nil then
+   index = math.random(table.getn(longRunTimeFuncs))
+   func = longRunTimeFuncs[index]
+  end
   
   if func ~= nil then 
    co = coroutine.create(func)
@@ -97,8 +109,12 @@ end
  
  function notifyNearGoal(goalIndex)
   func = nil
-  index = math.random(#closeToGoalFuncs)
-  func = closeToGoalFuncs[index]
+ -- numOfElements = tableLength(closeToGoalFuncs)
+ -- numOfElements = table.getn(closeToGoalFuncs)
+  if closeToGoalFuncs[1] ~= nil then
+   index = math.random(table.getn(closeToGoalFuncs))
+   func = closeToGoalFuncs[index]
+  end
   
   if func ~= nil then
    co = coroutine.create(func)
@@ -193,12 +209,18 @@ function pause()
 coroutine.yield()
 end
 
-
+function tablelength(T)
+  --local count = 0
+  --for _ in pairs(T) do count = count + 1 end
+  --return count
+  table.getn(T)
+end
 
 
 
 function start()
- --GAME:PlayMusic("res/music/Vibe Ace.ogg")
+ GAME:PlayMusic("3 am West End")
+ 
  logoScreen = GAME:ShowLogo()
 
  WaitForTime(100)
@@ -206,9 +228,8 @@ function start()
  logoScreen:ShowClickToStart()
 
  pause()
- --GAME:PlaySound("some file")
- GAME:ShowOverMap()
- --dofile("res/Stage3/level.lua")
+ GAME:ShowMainMenu()
+
 end
 
 ----------------

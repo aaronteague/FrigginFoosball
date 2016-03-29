@@ -2,6 +2,7 @@
 #include "FSM.h"
 #include "Table.h"
 #include "Dependencies\LuaBridge\LuaBridge.h"
+#include "LuaLoader.h"
 
 bool Character::luaBinded = false;
 
@@ -12,14 +13,15 @@ Character::Character(Scene* _scene, Table* table)
 {
 	if (!luaBinded)
 		luabridge::getGlobalNamespace(L)
-		.beginNamespace("character")
+		//	.beginNamespace("character")
 		.deriveClass<Character, Entity>("Character")
 		.addFunction("SetPosition", &Character::SetPosition)
 		.addFunction("WalkToPosition", &Character::WalkToPosition)
 		.addFunction("setAnimState", &Character::setAnimState)
 		.addFunction("ShowCharacter", &Character::ShowCharacter)
-		.endClass()
-		.endNamespace();
+		
+		.endClass();
+	//	.endNamespace();
 		//.beginNamespace("vector")
 		//.beginClass<Vector3>("Vector3")
 		//.addConstructor<void(*)(float, float, float)>()
@@ -83,6 +85,11 @@ void Character::changeAnimSet(AnimSet* nextAnimState)
 		else
 			GP_ERROR("Problem, animState is null on both accounts");
 
+		// change samplers and play
+		Model* model = (Model*)node->getDrawable();
+		model->getMaterial(EYE_PART)->getParameter("u_diffuseTexture")->setSampler(currentAnimSet->eyes);
+		if (!jaw)
+			model->getMaterial(MOUTH_PART)->getParameter("u_diffuseTexture")->setSampler(currentAnimSet->mouth);	
 		currentAnimSet->playingClip->play();
 	}
 	else
@@ -146,18 +153,18 @@ void Character::updateAnimation()
 
 }
 
-void Character::setupAnimSetList(Animation* _animation)
+void Character::setupAnimSetList(Animation* _animation, LuaLoader *loader)
 {
 	using namespace std;
 
-	struct IndexPair{
-		int a;
-		int b;
-		IndexPair(int pointA, int pointB) :a(pointA), b(pointB){}
-	};
+	//struct IndexPair{
+	//	int a;
+	//	int b;
+	//	IndexPair(int pointA, int pointB) :a(pointA), b(pointB){}
+	//};
 
-	vector<IndexPair> pairList{ IndexPair(3, 7), IndexPair(3, 8)
-		, IndexPair(5, 7), IndexPair(5, 8) };
+	//vector<IndexPair> pairList{ IndexPair(3, 7), IndexPair(3, 8)
+	//	, IndexPair(5, 7), IndexPair(5, 8) };
 
 	// yes i know, it is messy
 	//for (unsigned int i = 0; i < pairList.size(); ++i)
@@ -172,13 +179,39 @@ void Character::setupAnimSetList(Animation* _animation)
 
 	//	;
 
+	const int NUM_OF_SAMPLERS = 6;
+	samplerList.resize(NUM_OF_SAMPLERS);
+
+	
+	samplerList[E_NEUTRAL] = Texture::Sampler::create(loader->getString("EYE_NEUTRAL").c_str());
+	
+	samplerList[E_HAPPY] = Texture::Sampler::create(loader->getString("EYE_HAPPY").c_str());
+	
+	samplerList[E_ANGRY] = Texture::Sampler::create(loader->getString("EYE_ANGRY").c_str());
+	
+
+	if (!jaw){
+		samplerList[M_NEUTRAL] = Texture::Sampler::create(loader->getString("MOUTH_NEUTRAL").c_str());
+		samplerList[M_HAPPY] = Texture::Sampler::create(loader->getString("MOUTH_HAPPY").c_str());
+		samplerList[M_ANGRY] = Texture::Sampler::create(loader->getString("MOUTH_ANGRY").c_str());
+	}
+
+
 	// load other  animStates
-	animSetList.push_back(AnimSet(NULL, _animation->getClip("Walk"))); // we do this twice so it is continous
-	animSetList.push_back(AnimSet(_animation->getClip("Drop_Ball")));
-	animSetList.push_back(AnimSet(_animation->getClip("From_Drop_Ball")));
-	animSetList.push_back(AnimSet(NULL, _animation->getClip("Come_In")));
-	animSetList.push_back(AnimSet(_animation->getClip("Defeat")));
-	animSetList.push_back(AnimSet(_animation->getClip("Victory")));
+	animSetList.push_back(AnimSet(NULL, _animation->getClip("Walk"), NULL, samplerList[M_NEUTRAL], samplerList[E_NEUTRAL]));
+	animSetList.push_back(AnimSet(NULL, _animation->getClip("Wave"), NULL, samplerList[M_NEUTRAL], samplerList[E_NEUTRAL]));
+	animSetList.push_back(AnimSet(_animation->getClip("Happy"), NULL, NULL, samplerList[M_HAPPY], samplerList[E_HAPPY]));
+	animSetList.push_back(AnimSet(_animation->getClip("Angry"), NULL, NULL, samplerList[M_ANGRY], samplerList[E_ANGRY]));
+	animSetList.push_back(AnimSet(_animation->getClip("Victory"), NULL, NULL, samplerList[M_HAPPY], samplerList[E_HAPPY]));
+	animSetList.push_back(AnimSet(_animation->getClip("Defeat"), NULL, NULL, samplerList[M_ANGRY], samplerList[E_ANGRY]));
+	animSetList.push_back(AnimSet(NULL, _animation->getClip("Idle"), NULL, samplerList[M_NEUTRAL], samplerList[E_NEUTRAL]));
+
+	//animSetList.push_back(AnimSet(NULL, _animation->getClip("Walk"), NULL, samplerList[M_NEUTRAL], samplerList[E_NEUTRAL]));
+	//animSetList.push_back(AnimSet(NULL, _animation->getClip("Idle"), NULL, samplerList[M_NEUTRAL], samplerList[E_NEUTRAL]));
+	//animSetList.push_back(AnimSet(_animation->getClip("From_Drop_Ball"), NULL, NULL, samplerList[M_NEUTRAL], samplerList[E_NEUTRAL]));
+	//animSetList.push_back(AnimSet(NULL, _animation->getClip("Come_In"), NULL, samplerList[M_HAPPY], samplerList[E_HAPPY]));
+	//animSetList.push_back(AnimSet(_animation->getClip("Defeat"), NULL, NULL, samplerList[M_ANGRY], samplerList[E_ANGRY]));
+	//animSetList.push_back(AnimSet(_animation->getClip("Victory"), NULL, NULL, samplerList[M_HAPPY], samplerList[E_HAPPY]));
 
 //	changeAnimSet(&animSetList[0]);
 
@@ -189,10 +222,10 @@ void Character::SetPosition(Vector3 newPosition)
 	node->setTranslation(newPosition);
 }
 
-void Character::WalkToPosition(Vector3 pos, int waitTilFinished)
+void Character::WalkToPosition(Vector3 pos)
 {
 	setAnimState("Walk");
-	pausedLua = waitTilFinished;
+//	pausedLua = waitTilFinished;
 	targetPos = pos;
 
 	if (pausedLua){
@@ -217,10 +250,12 @@ void Character::checkForLuaResume() // check for walk
 		if ((targetPos - node->getTranslation()).length() < 0.3f) // break walk
 		{
 			node->setTranslation(targetPos);
+			setAnimState("Wave");
+			targetPos.set(0, 0, 0);
 			if (pausedLua){
-				pausedLua = false;
-				luabridge::LuaRef resume = luabridge::getGlobal(L, "resume");
-				resume();
+			//	pausedLua = false;
+			//	luabridge::LuaRef resume = luabridge::getGlobal(L, "resume");
+			//	resume();
 			}
 		}
 	}
@@ -237,8 +272,10 @@ void Character::setAnimState(std::string state)
 	if (focusedSet == NULL)
 		GP_ERROR(std::string("sorry, but " + state + " is not an animState ID").c_str());
 
-	currentAnimSet->playingClip->stop();
-	currentAnimSet->playingClip = NULL;
+	if (currentAnimSet){
+		currentAnimSet->playingClip->stop();
+		currentAnimSet->playingClip = NULL;
+	}
 
 	currentAnimSet = focusedSet;
 	nextAnimSet = NULL;
@@ -256,19 +293,48 @@ void Character::setAnimState(std::string state)
 
 }
 
-void Character::Clear()
-{
-	if (!node)
-		return;
-
-	_scene->removeNode(node);
-	SAFE_RELEASE(node);
-	animSetList.clear();
-	currentAnimSet = NULL;
-	nextAnimSet = NULL;
-}
+//void Character::Clear()
+//{
+//	if (!node)
+//		return;
+//
+//	_scene->removeNode(node);
+//	SAFE_RELEASE(node);
+//	animSetList.clear();
+//	currentAnimSet = NULL;
+//	nextAnimSet = NULL;
+//}
 
 void Character::ShowCharacter()
 {
 	_scene->addNode(node);
+}
+
+void Character::Clear()
+{
+	if (node){
+	
+
+		ownedPoles.clear();
+		allPoles.clear();
+		for (unsigned i = 0; i < animSetList.size(); ++i){
+			AnimSet* set = &animSetList[i];
+			// reference in node already, it will take care of it i think
+	//		if (set->enter)set->enter->release();
+	//		if (set->execute)set->execute->release();
+	//		if (set->exit)set->exit->release();
+		}
+		animSetList.clear();
+
+		for (unsigned i = 0; i < samplerList.size(); ++i)
+//		if (samplerList[i])
+//			samplerList[i]->release();
+		samplerList.clear();
+
+		if (node->getScene())
+			node->getScene()->removeNode(node);
+		node->release();
+		node = NULL;
+		currentAnimSet = NULL;
+	}
 }

@@ -5,7 +5,7 @@
 #include "../Opponent.h"
 
 Attack::Attack(Table* table)
-	:table(table) {
+	:table(table), self(NULL) {
 }
 
 void Attack::Enter(Entity* opponent, FSM* fsm, float& elapsedTime)
@@ -61,7 +61,11 @@ void Attack::Exit(Entity* opponent, FSM* fsm, float& elapsedTime)
 }
 void Attack::OnMessage(Entity* opponent, Telegram& telegram, FSM* fsm)
 {
-	//switch (telegram.msg){
-
-	//}
+	if (!self)
+		self = (Opponent*)opponent;
+	switch (telegram.msg){
+	case FSM::START_ROUND:
+		self->FadeToHands();
+		break;
+	}
 }

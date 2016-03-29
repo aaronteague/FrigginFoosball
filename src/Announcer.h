@@ -17,5 +17,5 @@ public:
 private:
 	std::vector<AudioSource*> audioFiles;
 	AudioSource* currentAudio = NULL;
-
+	static bool luaBinded;
 };

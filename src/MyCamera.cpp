@@ -144,7 +144,7 @@ void MyCamera::Update(const float& elapsedTime)
 	stateMachine->Update((float&)elapsedTime, true);
 
 	// if pan
-	if (panSpeed > 0){
+	if (panSpeed != 0){
 		Vector3 targetPos = target->getLookPosition();
 		//float length = (node->getTranslationWorld() - targetPos).length();
 		
@@ -168,7 +168,7 @@ void MyCamera::Update(const float& elapsedTime)
 
 void MyCamera::SetPosition(Vector3 newPosition)
 {
-	panSpeed = -1;
+	panSpeed = 0;
 	Vector3 pos = node->getTranslation();
 //	float x = newPosition.x + 0.1f;
 	//node->setTranslation(newPosition);
@@ -233,8 +233,9 @@ void MyCamera::LookAt(Entity* target)
 void MyCamera::Follow(Entity* target)
 {
 	LookAt(target);
-//	followNode = target->getNode();
-//	followOffset = target->getNode()->getTranslationWorld() - node->getTranslationWorld();
+	followNode = target->getNode();
+	panSpeed = 0;
+	followOffset = target->getNode()->getTranslationWorld() - node->getTranslationWorld();
 }
 
 void MyCamera::SetState(std::string state)
@@ -263,6 +264,15 @@ void MyCamera::PanAround(Entity* target, float speed, float radius)
 	MyCamera::target = target;
 	panSpeed = speed;
 	panRadius = radius;
+
+//	Vector3 dir3d = target->getNode()->getTranslationWorld() - node->getTranslationWorld();
+	Vector3 dir3d = node->getTranslationWorld() - target->getNode()->getTranslationWorld();
+
+	Vector2 dir2d(dir3d.x, dir3d.y);
+	dir2d.normalize();
+
+	curAngle = MATH_RAD_TO_DEG(atan2(dir2d.y, dir2d.x));
+  	int check = 7;
 }
 
 void MyCamera::PeekUp(int milliseconds)

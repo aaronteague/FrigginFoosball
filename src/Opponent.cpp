@@ -5,6 +5,7 @@
 #include "Table.h"
 
 #include "States\Attack.h"
+#include "States\OppAttack.h"
 
 Opponent::Opponent(Scene* _scene, Table* table)
 :Character(_scene, table)
@@ -15,18 +16,29 @@ Opponent::Opponent(Scene* _scene, Table* table)
 
 	// lua binding time
 	luabridge::getGlobalNamespace(L)
-		.beginNamespace("opponent")
+		//.beginNamespace("opponent")
 		.deriveClass<Opponent, Character>("Opponent")
 		.addFunction("Load", &Opponent::Load)
 		.addFunction("FadeToHands", &Opponent::FadeToHands)
 		.addFunction("FadeToCharacter", &Opponent::FadeToCharacter)
-		
-		.endClass()
-		.endNamespace();
+		.addFunction("SetDifficulty", &Opponent::SetDifficulty)
+
+		.endClass();
+		//.endNamespace();
 }
 
 void Opponent::Load(std::string file)
 {
+	if (node && file.compare(currentFile) == 0)
+		return; // no change, just leave it
+
+	if (node){
+		Clear();
+		// nix the hands now
+		delete(leftHand);
+		delete(rightHand);
+	}
+
 	LuaLoader loader(L);
 	loader.setFile(file);
 
@@ -34,7 +46,7 @@ void Opponent::Load(std::string file)
 	if (ownedPoles.size() == 0)
 		ownedPoles = table->getHandles(2);
 
-	stateMachine->SetCurrentState(new Attack(table));
+	stateMachine->SetCurrentState(new OppAttack(table));
 
 	if (allPoles.size() == 0)
 		allPoles = table->getHandles();
@@ -50,17 +62,7 @@ void Opponent::Load(std::string file)
 		rightHand->ownedPoles.push_back(_scene->findNode("Pole5"));
 	}
 
-	
-	// create the "hands"
-	//if (!leftHand && !rightHand){
-	//	leftHand = Node::create("Left_Hand");
-	//	rightHand = Node::create("Right_Hand");
-	//	_scene->addNode(leftHand);
-	//	_scene->addNode(rightHand);
-	//}
 
-	//((Model*)leftHand->getDrawable())->setMaterial(buildMaterial(_scene, NULL, COLORED, false, -1));
-	//((Model*)rightHand->getDrawable())->setMaterial(buildMaterial(_scene, NULL, COLORED, false, -1));
 
 	std::string gpbFile = loader.getString("GPB_FILE");
 	Bundle* characterBundle = Bundle::create(gpbFile.c_str());
@@ -68,32 +70,36 @@ void Opponent::Load(std::string file)
 	node = characterBundle->loadNode(id.c_str());
 	std::string textureFile = loader.getString("CHARACTER_TEXTURE");
 	Texture* bodyTex = Texture::create(textureFile.c_str());
-	((Model*)node->getDrawable())->setMaterial(buildMaterial(_scene, Texture::create(textureFile.c_str(), true), TEXTURED_ANIMATED, true, 40), 0);
+	((Model*)node->getDrawable())->setMaterial(buildMaterial(_scene, Texture::create(textureFile.c_str(), true), TEXTURED_ANIMATED, true, 50), 0);
 	std::string shirtFile = loader.getString("CHARACTER_SHIRT");
-	((Model*)node->getDrawable())->setMaterial(buildMaterial(_scene, bodyTex, TEXTURED_ANIMATED, true, 40), 1);
-	std::string eyeFile = loader.getString("CHARACTER_EYE");
-	((Model*)node->getDrawable())->setMaterial(buildMaterial(_scene, Texture::create(eyeFile.c_str(), true), TEXTURED_ANIMATED, true, 40), 2);
+	((Model*)node->getDrawable())->setMaterial(buildMaterial(_scene, Texture::create(shirtFile.c_str(), true), TEXTURED_ANIMATED, true, 50), 1);
+	std::string eyeFile = loader.getString("EYE_NEUTRAL");
+	((Model*)node->getDrawable())->setMaterial(buildMaterial(_scene, Texture::create(eyeFile.c_str(), true), TEXTURED_ANIMATED, true, 50), 2);
 	if (!loader.getInt("JAW")){
-		std::string mouthFile = loader.getString("CHARACTER_MOUTH");
-		((Model*)node->getDrawable())->setMaterial(buildMaterial(_scene, Texture::create(mouthFile.c_str(), true), TEXTURED_ANIMATED, true, 40), 3);
+		std::string mouthFile = loader.getString("MOUTH_NEUTRAL");
+		((Model*)node->getDrawable())->setMaterial(buildMaterial(_scene, Texture::create(mouthFile.c_str(), true), TEXTURED_ANIMATED, true, 50), 3);
 	}
+	else
+		jaw = true;
 
 	// hands
 	std::string lHandId = loader.getString("LEFT_HAND");
-	std::string rHandId = loader.getString("RIGHT_HAND");
+//	std::string rHandId = loader.getString("RIGHT_HAND");
 	leftHand->node = characterBundle->loadNode(lHandId.c_str());
 	((Model*)leftHand->node->getDrawable())->setMaterial(buildMaterial(_scene, bodyTex, TEXTURED_ANIMATED, true, 40));
 	((Model*)leftHand->node->getDrawable())->getMaterial()->getParameter("u_modulateAlpha")->setFloat(0);
-	rightHand->node = characterBundle->loadNode(rHandId.c_str());
+	rightHand->node = characterBundle->loadNode(lHandId.c_str());
 	rightHand->node->scaleX(-1);
 	((Model*)rightHand->node->getDrawable())->setMaterial(buildMaterial(_scene, bodyTex, TEXTURED_ANIMATED, true, 40));
 	((Model*)rightHand->node->getDrawable())->getMaterial()->getParameter("u_modulateAlpha")->setFloat(0);
-	_scene->addNode(leftHand->node);
-	_scene->addNode(rightHand->node);
-	Animation* _lhAnim = leftHand->node->getAnimation();
-	Animation* _rhAnim = rightHand->node->getAnimation();
+//	_scene->addNode(leftHand->node);
+//	_scene->addNode(rightHand->node);
+	Animation* _lhAnim = leftHand->node->getAnimation("animations");
+	Animation* _rhAnim = rightHand->node->getAnimation("animations");
 	_lhAnim->createClips("res/hands.animation");
 	_rhAnim->createClips("res/hands.animation");
+	_lhAnim->release();
+	_rhAnim->release();
 	leftHand->grabAnim = _lhAnim->getClip("Close_Hand");
 	leftHand->releaseAnim = _lhAnim->getClip("Open_Hand");
 	rightHand->grabAnim = _rhAnim->getClip("Close_Hand");
@@ -102,18 +108,15 @@ void Opponent::Load(std::string file)
 	Animation* _animation = node->getAnimation("animations");
 	_animation->createClips("res/animation.animation");
 
-	setupAnimSetList(_animation);
+	setupAnimSetList(_animation, &loader);
 
 //	_scene->addNode(node);
 	characterBundle->release();
 	bodyTex->release();
 
 	// put hands in their place
-	putHandOnBar(leftHand->ownedPoles[0]);
-	putHandOnBar(rightHand->ownedPoles[0]);
-
-	Vector3 trans = node->getTranslation();
-	int i = 7;
+	putHandOnBar(leftHand->ownedPoles[0], true);
+	putHandOnBar(rightHand->ownedPoles[0], true);
 }
 
 
@@ -187,27 +190,34 @@ void Opponent::moveHandTowardsBar(Node* bar, float elapsedTime)
 }
 
 
-void Opponent::putHandOnBar(Node* bar)
+void Opponent::putHandOnBar(Node* bar, bool immediate)
 {
-	//if (bar == leftHandPoles[0] || bar == leftHandPoles[1])
-	//	leftHand->setTranslation(correctedYTrans(bar));
-	//else if (bar == rightHandPoles[0] || bar == rightHandPoles[1])
-	//	rightHand->setTranslation(correctedYTrans(bar));
+
 
 	if (!leftHand->goToTarget && (bar == leftHand->ownedPoles[0] || bar == leftHand->ownedPoles[1])){
 		leftHand->goToTarget = bar;
 		leftHand->heldPole = NULL;
 		leftHand->currentAnim = leftHand->releaseAnim;
 		leftHand->currentAnim->play();
+		if (immediate) 
+			leftHand->node->setTranslation(correctedYTrans(leftHand->goToTarget));
+		
 	}
 	else if (!rightHand->goToTarget && (bar == rightHand->ownedPoles[0] || bar == rightHand->ownedPoles[1])){
 		rightHand->goToTarget = bar;
 		rightHand->heldPole = NULL;
 		rightHand->currentAnim = rightHand->releaseAnim;
 		rightHand->currentAnim->play();
+		if (immediate)
+			rightHand->node->setTranslation(correctedYTrans(rightHand->goToTarget));
 	}
 }
 
+
+void Opponent::SetDifficulty(float difficulty)
+{
+	Opponent::difficulty = difficulty;
+}
 
 Vector3 Opponent::correctedYTrans(Node* pole)
 {
@@ -280,6 +290,7 @@ void Opponent::updateHand(Hand* hand)
 			if (handOnBar(hand->goToTarget) && hand->currentAnim != hand->grabAnim){
 				hand->currentAnim = hand->grabAnim;
 				hand->currentAnim->play();
+				
 			} //  && !hand->currentAnim->isPlaying()
 			else if (handOnBar(hand->goToTarget) && hand->currentAnim == hand->grabAnim){
 				hand->heldPole = hand->goToTarget;
@@ -299,12 +310,24 @@ void Opponent::updateHand(Hand* hand)
 
 void Opponent::FadeToHands()
 {
+	if (!leftHand->node->getScene())
+		_scene->addNode(leftHand->node);
+	if (!rightHand->node->getScene())
+		_scene->addNode(rightHand->node);
+	if (!node->getScene())
+		_scene->addNode(node);
 	fadeTarget = HANDS;
 	charAlpha = 1;
 	handAlpha = 0;
 }
 void Opponent::FadeToCharacter()
 {
+	if (!leftHand->node->getScene())
+		_scene->addNode(leftHand->node);
+	if (!rightHand->node->getScene())
+		_scene->addNode(rightHand->node);
+	if (!node->getScene())
+		_scene->addNode(node);
 	fadeTarget = OPPONENT;
 	handAlpha = 1;
 	charAlpha = 0;
@@ -320,6 +343,7 @@ void Opponent::updateTransparency(){
 			fadeTarget = NEITHER;
 			handAlpha = 1;
 			charAlpha = 0;
+			_scene->removeNode(node);
 		}
 	}
 	else if (fadeTarget == OPPONENT){
@@ -329,6 +353,8 @@ void Opponent::updateTransparency(){
 			fadeTarget = NEITHER;
 			charAlpha = 1;
 			handAlpha = 0;
+			_scene->removeNode(leftHand->node);
+			_scene->removeNode(rightHand->node);
 		}
 	}
 	Model* charModel = (Model*)node->getDrawable();

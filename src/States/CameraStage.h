@@ -26,6 +26,6 @@ private:
 
 	MyCurve* curve = NULL;
 
-	MyCamera* self;
+	MyCamera* self = NULL;
 
 };

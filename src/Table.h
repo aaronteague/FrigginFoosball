@@ -13,6 +13,7 @@ class Table : public Entity, public PhysicsCollisionObject::CollisionListener
 	friend class TableIdle;
 public:
 	Table(Scene* _scene, Vector2 screenSize, MyCamera* camera);
+	~Table();
 	void Load(std::string file);
 	void Clear();
 	void Update(const float& elapsedTime);
@@ -27,6 +28,8 @@ public:
 	std::vector<Node*> getHandles(int characterID = -1);
 	Node* getBall(){ return ballNode; }
 	Node* getGoal(int goalID);
+	Scene* getScene(){ return _scene; }
+	MyCamera* getCamera(){ return camera; }
 
 	void keyEvent(Keyboard::KeyEvent evt, int key);
 	void touchEvent(Touch::TouchEvent evt, int x, int y, unsigned int contactIndex);
@@ -61,12 +64,13 @@ private:
 	Node* goalA;
 	Node* goalB;
 
+
 	Vector2 screenTouchPos;
 	Vector2 worldTouchPos;
 
 	Node* ballNode;
 	float ballSpeed;
-	Node* tableNode;
+	Node* tableNode = NULL;
 	Node* fieldNode;
 	std::vector<Node*> sides;
 
@@ -76,7 +80,7 @@ private:
 
 	SpriteBatch* shadowBatch;
 	Font* font;
-	PowerUp* powerUp;
+	PowerUp* powerUp = NULL;
 
 	ParticleEmitter* ballEmitter = NULL;
 	ParticleEmitter* magnetEmitter = NULL;
@@ -112,4 +116,5 @@ private:
 
 	float getSoftLock(const Vector2& difference, const Vector3& manPos, const Vector3& polePos);
 	void checkScriptCallbacks(const float& elapsedTime);
+	bool removePhysObjects(Node* node);
 };

@@ -1,94 +1,89 @@
- level = 0
- 
- function stage1()
+  function stage3()
+
+ -- load up visual assets
  level = GAME:StartGame()
  
  gameTable:Load("res/table.lua")
  opponent:Load("res/Aylott/opponent.lua")
- --player:Load("res/Pamela/player.lua")
-   
-   --wait(1000) -- test
+ opponent:SetDifficulty(0.5)
+ GAME:PlayMusic("3 am West End")
+ player:Load("res/Pamela/player.lua")
+ 
+ -- load up the sounds
  loadAnnouncerSounds()
- --GAME:PlayMusic("res/music/Hep Cats.ogg")
  
- setEventOnScore(opponent, 1, opponentDance)
- setEventOnBallCloseToGoal(saySomething)
- setEventOnPowerUpReceived(saySomething, "Speed", 1)
- setEventOnLongRunTime(saySomething)
+ announcer:Say(0) -- stage intro
  
- WaitForTime(1000)
+ -- set up the events
+ setEventOnWin(1, playerWin)
+ setEventOnWin(2, opponentWin)
+ 
+ camera:SetPosition(tableCamOffset)
+ camera:PanAround(gameTable, -3, 10)
+ 
+ WaitForTime(3500)
  opponent:SetPosition(opponentStartPos)
  opponent:ShowCharacter()
- --player:SetPosition(playerPlayPos)
+ opponent:WalkToPosition(opponentPlayPos)
+ camera:SetPosition(opponentStartCamOffset)
+ camera:Follow(opponent)
  
- --camera:SetPosition(tableCamOffset)
- --camera:LookAt(gameTable)
- 
- --announcer:Say(0)
- --wait(4)
-
- --camera:SetPosition(opponentCamOffset)
- camera:PanAround(opponent, 10, 30)
- WaitForTime(1000)
- 
- camera:ZoomIntoTarget(1000)
- 
- WaitForTime(2000)
- --opponent:WalkToPosition(opponentPlayPos, 1)
- --pause()  -- wait to get to position
- 
- --opponent:setAnimState("Come_In")
- --wait(4) 
- 
- --camera:SetPosition(playerCamOffset)
- --camera:LookAt(player)
- --player:setAnimState("Come_In")
- --wait(3)
+ WaitForTime(6000)
+ player:SetPosition(playerStartPos);
+ player:ShowCharacter()
+ player:WalkToPosition(playerPlayPos);
+ camera:SetPosition(playerStartCamOffset)
+ camera:Follow(player)
  
  
- 
- --camera:SetState("Round_Ready")
- opponent:FadeToHands();
- level:SwoopLogo(200)
+ WaitForTime(8000)
+ level:SwoopLogo(3000)
  pause()
- level:StartRound()
+ level:StartRound()  -- make player invisible again
  
+ -- rest is handled from callbacks
 end
 
 function loadAnnouncerSounds()
  announcer:LoadFile(0, "res/Stage3/intro.ogg")
- announcer:LoadFile(1, "res/Stage1/player_win.ogg")
- announcer:LoadFile(2, "res/Stage1/player_lose.ogg")
+ announcer:LoadFile(1, "res/Stage3/Pamela_Win.ogg")
+ announcer:LoadFile(2, "res/Stage2/Aylott_Wins.ogg")
 end
 
 function opponentDance()
- -- go back here please
- GAME:ResetTimer()
- opponent:FadeToCharacter()
- camera:PeekUp(2000)
- WaitForTime(4000)
- opponent:FadeToHands()
- 
  level:StartRound()
 end
 
 function playerWin()
+ GAME:ResetTimer()
  announcer:Say(1)
- --wait(3000)
+ player:setAnimState("Victory")
+ player:ShowCharacter()
+ camera:SetState("Camera_Stage")
+ camera:SetPosition(playerStartCamOffset)
+ camera:LookAt(player)
+ GAME:SaveProgress(1, 4)
+ WaitForTime(3000)
+ GAME:ShowOverMap()
 end
 
 function opponentWin()
+ GAME:ResetTimer()
+ opponent:FadeToCharacter()
+ WaitForTime(100)
+ camera:SetState("Camera_Stage")
  announcer:Say(2)
- --wait(3000)
-end
-
-function saySomething()
- announcer:Say(1)
+ opponent:setAnimState("Victory")
+ 
+ camera:SetPosition(opponentStartCamOffset)
+ camera:LookAt(opponent)
+ WaitForTime(3000)
+ GAME:ShowOverMap()
 end
 
 
 
 ----------------
 
-co = coroutine.create(stage1)
+co = coroutine.create(stage3)
 coroutine.resume(co)

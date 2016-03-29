@@ -17,6 +17,9 @@ OverMap::OverMap(Vector2 screenSize, Game* game)
 	}
 	luaBinded = true;
 
+	loadSound(DING, "res/sounds/ping.wav");
+	loadSound(PAPER, "res/sounds/sheet.wav");
+
 	//	gameRunning = false;
 
 	Bundle* bund = Bundle::create("res/corkboard.gpb");
@@ -37,11 +40,11 @@ OverMap::OverMap(Vector2 screenSize, Game* game)
 		_scene->addNode(node);
 	}
 
-	Node* node = _scene->findNode("Paper");
-	Model* paperModel = (Model*)node->getDrawable();
-	paperModel->setMaterial(Entity::buildMaterial(_scene, Texture::create("res/pic.png"), Entity::TEXTURED, false, -1), 0);
-	paperModel->setMaterial(Entity::buildMaterial(_scene, Texture::create("res/text.png"), Entity::TEXTURED, false, -1), 1);
-	paperModel->setMaterial(Entity::buildMaterial(_scene, Texture::create("res/text.png"), Entity::TEXTURED, false, -1), 2);
+	Node* node;
+//	Model* paperModel = (Model*)node->getDrawable();
+//	paperModel->setMaterial(Entity::buildMaterial(_scene, Texture::create("res/pic.png"), Entity::TEXTURED, false, -1), 0);
+//	paperModel->setMaterial(Entity::buildMaterial(_scene, Texture::create("res/text.png"), Entity::TEXTURED, false, -1), 1);
+//	paperModel->setMaterial(Entity::buildMaterial(_scene, Texture::create("res/text.png"), Entity::TEXTURED, false, -1), 2);
 
 
 	node = _scene->findNode("Tack");
@@ -66,9 +69,10 @@ OverMap::OverMap(Vector2 screenSize, Game* game)
 
 
 	progress = 0;
-	if (FileSystem::fileExists("save.txt")){
+	if (FileSystem::fileExists("res/save.txt")){
 		char levelIndex[10];
-		FileSystem::open("save.txt", FileSystem::READ)->readLine(levelIndex, 10);
+		FileSystem::open("res/save.txt", FileSystem::READ)->readLine(levelIndex, 10);
+		
 
 		progress = atoi(levelIndex);
 	}
@@ -83,6 +87,8 @@ OverMap::OverMap(Vector2 screenSize, Game* game)
 	}
 
 	bund->release();
+
+	
 }
 
 void OverMap::Update(const float& elapsedTime)
@@ -150,7 +156,7 @@ void OverMap::touchEvent(Touch::TouchEvent evt, int x, int y, unsigned int conta
 void OverMap::addLevelFlier(int index, Scene* scene, bool animate)
 {
 	FrameBuffer* defaultFB = FrameBuffer::getCurrent();
-
+	gameplay::Rectangle defaultViewPort = Game::getInstance()->getViewport();
 	LuaLoader loader(L);
 	loader.setFile("res/levelList.lua");
 	luabridge::LuaRef levelTable = loader.getTable("LevelList");
@@ -171,22 +177,35 @@ void OverMap::addLevelFlier(int index, Scene* scene, bool animate)
 
 	//temp.shadow = Node::create("shadow");
 
+//	FrameBuffer* tempFB = FrameBuffer::create("tempFB", 1024, 1024);
+////	Texture* tempTex = Texture::create(1024, 1024, Image::RGBA);
+//	RenderTarget* target = RenderTarget::create("tempRT", 1024, 1024);
+//	Image* tempImg = Image::create(1024, 1024, Image::RGBA);
+//
+//	tempFB->setRenderTarget(target);
+//	tempFB->bind();
+
 	FrameBuffer* tempFB = FrameBuffer::create("tempFB", 1024, 1024);
-	Texture* tempTex = Texture::create(1024, 1024, Image::RGBA);
+	
+	//	Texture* tempTex = Texture::create(1024, 1024, Image::RGBA);
 	RenderTarget* target = RenderTarget::create("tempRT", 1024, 1024);
+	
 	Image* tempImg = Image::create(1024, 1024, Image::RGBA);
-	//defaultFB->setRenderTarget(target);
+
 	tempFB->setRenderTarget(target);
 	tempFB->bind();
-	//	Image* screenShot = tempFB->createScreenshot();
 
-
-
+	Game::getInstance()->setViewport(gameplay::Rectangle(0,0,1024,1024));
 	game->clear(Game::CLEAR_COLOR_DEPTH, Vector4(1, 1, 1, 1), 1.0f, 0);
-
+	
 	// render to a texture
+	Matrix persp;
+//	Matrix::createPerspective(25, 1, 0.1, 3, &persp);
+	
+//	font->getSpriteBatch(font->getSize())->setProjectionMatrix(persp);
 	font->start();
-	font->drawText(temp.text.c_str(), gameplay::Rectangle(20, 0, 980, 700), Vector4(0, 0, 0, 1), font->getSize() * 8, Font::Justify::ALIGN_TOP_LEFT, true, false, gameplay::Rectangle(20, 0, 980, 700));
+//	
+	font->drawText(temp.text.c_str(), gameplay::Rectangle(20, 300, 980, 700), Vector4(0, 0, 0, 1), font->getSize() * 8, Font::Justify::ALIGN_TOP_LEFT, true, false, gameplay::Rectangle(20, 0, 980, 700));
 	font->finish();
 
 	//	test = target->getTexture();
@@ -226,7 +245,7 @@ void OverMap::addLevelFlier(int index, Scene* scene, bool animate)
 		temp.clip = anim->getClip("Fly_In");
 		temp.clip->play();
 		temp.nodeAlpha = temp.pinAlpha = temp.shadowAlpha = 0;
-
+		playSound(PAPER);
 	}
 
 	levelList.push_back(temp);
@@ -235,6 +254,7 @@ void OverMap::addLevelFlier(int index, Scene* scene, bool animate)
 	if (animate)
 		targetAnimate = &levelList[levelList.size() - 1];
 
+	Game::getInstance()->setViewport(defaultViewPort);
 	defaultFB->bind();
 
 	// set target for camera
@@ -257,12 +277,26 @@ bool OverMap::gestureTapEvent(int x, int y)
 			if (pickRay->intersects(box) != Ray::INTERSECTS_NONE){
 				//((main*)game)->StartGame(levelList[i].levelFile);
 				gameStatus = 2; // GAME_RUNNING
-				int status = luaL_dofile(L, levelList[i].levelFile.c_str());
+			//	int status = luaL_dofile(L, levelList[i].levelFile.c_str());
+
+				playSound(DING);
+				char* file = FileSystem::readAll(levelList[i].levelFile.c_str());
+				int status = luaL_dostring(L, file);
+				if (status != 0){
+					std::string error = lua_tostring(L, -1);
+					GP_ERROR(error.c_str());
+				}
+				delete[] file;
+
 				return true;
-				int banana = 7; // use this to look at the status above
 			}
 
 		}
 	}
 	return false;
+}
+
+OverMap::~OverMap()
+{
+
 }

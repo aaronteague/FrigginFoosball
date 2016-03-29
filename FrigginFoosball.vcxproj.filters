@@ -78,10 +78,86 @@
     <ClInclude Include="src\main.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\Dependencies\LuaBridge\detail\CFunctions.h" />
+    <ClInclude Include="src\Dependencies\LuaBridge\detail\ClassInfo.h" />
+    <ClInclude Include="src\Dependencies\LuaBridge\detail\Constructor.h" />
+    <ClInclude Include="src\Dependencies\LuaBridge\detail\FuncTraits.h" />
+    <ClInclude Include="src\Dependencies\LuaBridge\detail\Iterator.h" />
+    <ClInclude Include="src\Dependencies\LuaBridge\detail\LuaException.h" />
+    <ClInclude Include="src\Dependencies\LuaBridge\detail\LuaHelpers.h" />
+    <ClInclude Include="src\Dependencies\LuaBridge\detail\LuaRef.h" />
+    <ClInclude Include="src\Dependencies\LuaBridge\detail\Namespace.h" />
+    <ClInclude Include="src\Dependencies\LuaBridge\detail\Stack.h" />
+    <ClInclude Include="src\Dependencies\LuaBridge\detail\TypeList.h" />
+    <ClInclude Include="src\Dependencies\LuaBridge\detail\TypeTraits.h" />
+    <ClInclude Include="src\Dependencies\LuaBridge\detail\Userdata.h" />
+    <ClInclude Include="src\Dependencies\LuaBridge\LuaBridge.h" />
+    <ClInclude Include="src\Dependencies\LuaBridge\RefCountedObject.h" />
+    <ClInclude Include="src\Dependencies\LuaBridge\RefCountedPtr.h" />
+    <ClInclude Include="src\Screen.h" />
+    <ClInclude Include="src\Screens\StartScreen.h" />
+    <ClInclude Include="src\Announcer.h" />
+    <ClInclude Include="src\Character.h" />
+    <ClInclude Include="src\Entity.h" />
+    <ClInclude Include="src\FSM.h" />
+    <ClInclude Include="src\LuaLoader.h" />
+    <ClInclude Include="src\MyCamera.h" />
+    <ClInclude Include="src\MyCurve.h" />
+    <ClInclude Include="src\Opponent.h" />
+    <ClInclude Include="src\Player.h" />
+    <ClInclude Include="src\PowerUp.h" />
+    <ClInclude Include="src\State.h" />
+    <ClInclude Include="src\Table.h" />
+    <ClInclude Include="src\States\Attack.h" />
+    <ClInclude Include="src\States\CameraFollow.h" />
+    <ClInclude Include="src\States\CameraOvermap.h" />
+    <ClInclude Include="src\States\CameraStage.h" />
+    <ClInclude Include="src\States\TableIdle.h" />
+    <ClInclude Include="src\Screens\FoosballScreen.h" />
+    <ClInclude Include="src\Screens\LogoSwoop.h" />
+    <ClInclude Include="src\Screens\OverMap.h" />
+    <ClInclude Include="src\Screens\CreditsScreen.h" />
+    <ClInclude Include="src\Screens\ShutterScreen.h" />
+    <ClInclude Include="src\Screens\MainMenu.h" />
+    <ClInclude Include="src\Screens\AboutScreen.h" />
+    <ClInclude Include="src\Screens\AdvertScreen.h" />
+    <ClInclude Include="src\States\OppAttack.h" />
+    <ClInclude Include="src\Screens\Pause.h" />
+    <ClInclude Include="src\Screens\DifficultySet.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\Screen.cpp" />
+    <ClCompile Include="src\Screens\StartScreen.cpp" />
+    <ClCompile Include="src\Announcer.cpp" />
+    <ClCompile Include="src\Character.cpp" />
+    <ClCompile Include="src\Entity.cpp" />
+    <ClCompile Include="src\FSM.cpp" />
+    <ClCompile Include="src\LuaLoader.cpp" />
+    <ClCompile Include="src\MyCamera.cpp" />
+    <ClCompile Include="src\MyCurve.cpp" />
+    <ClCompile Include="src\Opponent.cpp" />
+    <ClCompile Include="src\Player.cpp" />
+    <ClCompile Include="src\PowerUp.cpp" />
+    <ClCompile Include="src\State.cpp" />
+    <ClCompile Include="src\Table.cpp" />
+    <ClCompile Include="src\States\Attack.cpp" />
+    <ClCompile Include="src\States\CameraFollow.cpp" />
+    <ClCompile Include="src\States\CameraOvermap.cpp" />
+    <ClCompile Include="src\States\CameraStage.cpp" />
+    <ClCompile Include="src\States\TableIdle.cpp" />
+    <ClCompile Include="src\Screens\FoosballScreen.cpp" />
+    <ClCompile Include="src\Screens\LogoSwoop.cpp" />
+    <ClCompile Include="src\Screens\OverMap.cpp" />
+    <ClCompile Include="src\Screens\CreditsScreen.cpp" />
+    <ClCompile Include="src\Screens\ShutterScreen.cpp" />
+    <ClCompile Include="src\Screens\MainMenu.cpp" />
+    <ClCompile Include="src\Screens\AboutScreen.cpp" />
+    <ClCompile Include="src\Screens\AdvertScreen.cpp" />
+    <ClCompile Include="src\States\OppAttack.cpp" />
+    <ClCompile Include="src\Screens\Pause.cpp" />
+    <ClCompile Include="src\Screens\DifficultySet.cpp" />
   </ItemGroup>
 </Project>

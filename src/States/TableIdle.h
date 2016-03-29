@@ -22,7 +22,7 @@ private:
 	const float FLOAT_TIMER = 1500;
 	int timer = 0;
 	int powerupTimer = -1;
-	const float POWERUP_TIMER = 3000;
+	
 	Node* powerUpItem = NULL;
 	PhysicsCollisionObject* removableObject = NULL;
 	bool addPhysics = false;

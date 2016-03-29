@@ -7,6 +7,9 @@
 #include "../MyCamera.h"
 #include "../Player.h"
 #include "LogoSwoop.h"
+#include "ShutterScreen.h"
+#include "AdvertScreen.h"
+#include "Pause.h"
 
 
 #include "../Announcer.h"
@@ -15,14 +18,15 @@
 
 bool FoosballScreen::luaBinded = false;
 
-FoosballScreen::FoosballScreen(Vector2 screenSize, Game* game)
-:screenSize(screenSize), game(game)
+FoosballScreen::FoosballScreen(Vector2 screenSize, Game* game, Table* table, Opponent* opponent, Player* player)
+:screenSize(screenSize), game(game), player(player), opponent(opponent), table(table)
 {
 	if (!luaBinded){
 		luabridge::getGlobalNamespace(L)
 			.deriveClass<FoosballScreen, Screen>("FoosballScreen")
 			.addFunction("SwoopLogo", &FoosballScreen::SwoopLogo)
 			.addFunction("StartRound", &FoosballScreen::StartRound)
+			.addFunction("ShowAds", &FoosballScreen::ShowAds)
 			.endClass();
 	}
 	luaBinded = true;
@@ -30,14 +34,11 @@ FoosballScreen::FoosballScreen(Vector2 screenSize, Game* game)
 	announcer = new Announcer();
 	luabridge::setGlobal(L, announcer, "announcer");
 
-	_scene = Scene::load("res/table.gpb");
+	_scene = table->getScene();
 
-	camera = new MyCamera(_scene, screenSize.x, screenSize.y);
-	camera->SetState("Camera_Stage");
-	luabridge::setGlobal(L, camera, "camera");
+	camera = table->getCamera();
 
-	table = new Table(_scene, screenSize, camera);
-	luabridge::setGlobal(L, table, "gameTable");
+
 
 	game->getPhysicsController()->setGravity(Vector3(0, 0, -10));
 
@@ -47,23 +48,47 @@ FoosballScreen::FoosballScreen(Vector2 screenSize, Game* game)
 	//loadScene = NULL;
 	_scene->getActiveCamera()->setAspectRatio(game->getAspectRatio());
 
-	opponent = new Opponent(_scene, table);
-	luabridge::setGlobal(L, opponent, "opponent");
 
-	player = new Player(_scene, table, camera);
-	luabridge::setGlobal(L, player, "player");
+
+	//////// UNCOMMENT THIS PART FOR RELEASE ///////////////
+	/*advertScreen = new AdvertScreen(screenSize, game); */
+	childScreen = new ShutterScreen(screenSize);
+}
+
+FoosballScreen::~FoosballScreen()
+{
+//	delete(announcer);
+	
+//	delete(camera);
+//	delete(table);
+//	delete(opponent);
+//	delete(player);
+//	if (childScreen)
+//		delete(childScreen);
+//	_scene->release();
+	
 }
 void FoosballScreen::Update(const float& elapsedTime)
 {
 	table->Update(elapsedTime);
-	opponent->Update(elapsedTime);
-	player->Update(elapsedTime);
+	if (opponent->getNode())
+		opponent->Update(elapsedTime);
+	if (player->getNode())
+		player->Update(elapsedTime);
 	camera->Update(elapsedTime);
 
-	if (logoSwoop){
-		logoSwoop->Update(elapsedTime);
-		if (logoSwoop->isFinished())
-			SAFE_DELETE(logoSwoop);
+	if (childScreen){
+		childScreen->Update(elapsedTime);
+		if (childScreen->getIsFinished() && childScreen == advertScreen) {
+			childScreen = NULL;
+			luabridge::LuaRef resume = luabridge::getGlobal(L, "resume");
+			resume();
+		}
+		else if (childScreen->getIsFinished()) {
+			if (childScreen == pauseScreen)
+				ResumeGame();
+			SAFE_DELETE(childScreen);
+		}
 	}
 
 	//if (starAlpha > 0)
@@ -73,17 +98,21 @@ void FoosballScreen::Update(const float& elapsedTime)
 }
 void FoosballScreen::Render()
 {
-	_scene->visit(this, &FoosballScreen::drawScene);
+	if ((childScreen && childScreen != pauseScreen) || !childScreen) {
+		_scene->visit(this, &FoosballScreen::drawScene);
 
-	table->Render();
+		table->Render();
+	}
 
 	// let's draw the logo swoop if there
-	if (logoSwoop)
-		logoSwoop->Render();
+	if (childScreen)
+		childScreen->Render();
 }
 void FoosballScreen::touchEvent(Touch::TouchEvent evt, int x, int y, unsigned int contactIndex)
 {
-	//if (gameStatus == GAME_RUNNING)
+	if (childScreen)
+		childScreen->touchEvent(evt, x, y, contactIndex);
+	else
 		table->touchEvent(evt, x, y, contactIndex);
 }
 
@@ -94,11 +123,15 @@ void FoosballScreen::touchEvent(Touch::TouchEvent evt, int x, int y, unsigned in
 
 bool FoosballScreen::drawScene(Node* node)
 {
-	// If the node visited contains a drawable object, draw it
-	Drawable* drawable = node->getDrawable();
+	std::string trueStr("true");
+	// if doesn't receive tag or if visible tag is true
+	node->getTag("visible");
+	if (!node->getTag("visible") || trueStr.compare(node->getTag("visible")) == 0){ 
+		Drawable* drawable = node->getDrawable();
 
-	if (drawable)
-		drawable->draw();
+		if (drawable)
+			drawable->draw();
+	}
 
 	return true;
 }
@@ -107,15 +140,63 @@ void FoosballScreen::StartRound()
 {
 	MessageDispatcher::Instance()->dispatchMessage(0, NULL, table, FSM::START_ROUND, NULL);
 	MessageDispatcher::Instance()->dispatchMessage(0, NULL, camera, FSM::START_ROUND, table);
+	if (opponent->getNode()) // getNode() will check 
+		MessageDispatcher::Instance()->dispatchMessage(0, NULL, opponent, FSM::START_ROUND, NULL);
+	if (player->getNode())
+		player->MakeInvisible();
+	if (player->getNode())
+		player->setAnimState("Idle");
+	if (opponent->getNode())
+	opponent->setAnimState("Idle");
 	roundRunning = true;
+	
 }
 
 void FoosballScreen::SwoopLogo(int milliseconds)
 {
-	logoSwoop = new LogoSwoop(screenSize, milliseconds);
+	if (childScreen)
+		SAFE_DELETE(childScreen);
+
+	childScreen = new LogoSwoop(screenSize, milliseconds);
+	if (player->getNode())
+		player->MakeInvisible();
+	if (opponent->getNode())
+		opponent->FadeToHands();
+	MessageDispatcher::Instance()->dispatchMessage(0, NULL, camera, FSM::START_ROUND, table);
+}
+
+void FoosballScreen::ShowAds()
+{
+	advertScreen->ShowAds();
+	childScreen = advertScreen;
+	//luabridge::LuaRef pause = luabridge::getGlobal(L, "pause");
+	//pause();
+//	lua_getglobal(L, "pause");
+//	lua_call(L, 0, 0);
+
+}
+
+void FoosballScreen::PauseGame()
+{
+	childScreen = pauseScreen = new Pause(screenSize, 0, 0, table, camera);
+	pauseVelocity = ((PhysicsRigidBody*)table->getBall()->getCollisionObject())->getLinearVelocity();
+	((PhysicsRigidBody*)table->getBall()->getCollisionObject())->setKinematic(true);
+	
+}
+
+void FoosballScreen::ResumeGame()
+{
+	// do some stuff
+	((PhysicsRigidBody*)table->getBall()->getCollisionObject())->setKinematic(false);
+	((PhysicsRigidBody*)table->getBall()->getCollisionObject())->setLinearVelocity(pauseVelocity);
+	SAFE_DELETE(pauseScreen);
+	childScreen = NULL;
 }
 
 void FoosballScreen::keyEvent(Keyboard::KeyEvent evt, int key)
 {
+	if (childScreen == NULL && (key == Keyboard::KEY_BACKSPACE || key == Keyboard::KEY_ESCAPE)) {
+		PauseGame();
+	}
 	table->keyEvent(evt, key);
 }

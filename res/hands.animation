@@ -4,14 +4,14 @@ animation Hands
 
 	 clip Close_Hand
     {
-        begin = 1
+        begin = 0
         end = 10
         repeatCount = 1
     }
 	 clip Open_Hand
     {
         begin = 11
-        end = 20
+        end = 19
         repeatCount = 1
     }
 }

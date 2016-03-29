@@ -6,7 +6,9 @@
 
 using namespace gameplay;
 
-
+class Table;
+class Opponent;
+class Player;
 class MyCamera;
 struct lua_State;
 
@@ -18,10 +20,19 @@ class Screen;
 class StartScreen;
 class OverMap;
 class FoosballScreen;
+class MainMenu;
+class AboutScreen;
+class DifficultySet;
 
 // global, mmkay
 lua_State *L;
 int gameStatus;
+
+int panic(lua_State* state){
+	std::string error = lua_tostring(state, -1);
+	GP_ERROR(error.c_str());
+	return 0;
+}
 
 
 /**
@@ -33,10 +44,20 @@ public:
 	enum STATUS{
 		TITLE_SCREEN,
 		OVERMAP,
-		GAME_RUNNING
+		MAIN_MENU,
+		GAME_RUNNING,
+		ABOUT_SCREEN,
+		DIFFICULTY_SET,
+		PAUSED
 	};
 
 	Screen* currentScreen = NULL;
+	Screen* creditsScreen = NULL;
+	Screen* removeScreen = NULL;
+
+	Table* table;
+	Opponent* opponent;
+	Player* player;
 
 	//std::vector<Node*> p1Handles;
 	//std::vector<Node*> p2Handles;
@@ -47,6 +68,8 @@ public:
      * Constructor.
      */
     main();
+
+	
 
     /**
      * @see Game::keyEvent
@@ -64,11 +87,15 @@ public:
 	void WaitForTime(float milliseconds);
 //	void StartRound();
 //	void SwoopLogo(int milliseconds);
-	void PlayMusic(std::string file);
+	void PlayMusic(std::string title);
 	void PlaySound(std::string file);
 	StartScreen* ShowLogo();
 	//void ShowClickToStart();
 	OverMap* ShowOverMap();
+	MainMenu* ShowMainMenu();
+	AboutScreen* ShowAboutScreen();
+	DifficultySet* ShowDifficultySet();
+
 	void SaveProgress(int moveAheadLevel, int currentLevel);
 
 
@@ -79,6 +106,8 @@ public:
 	//Node* getClosestMan(Node* bar);
 	//Vector3 getDifference(Node* man);
 	std::string to_string(int number);
+
+
 
 protected:
 	//effects for "buildMaterial"

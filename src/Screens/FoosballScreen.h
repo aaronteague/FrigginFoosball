@@ -11,11 +11,14 @@ class MyCurve;
 class Announcer;
 class MyCamera;
 class LogoSwoop;
+class AdvertScreen;
+class Pause;
 
 class FoosballScreen : public Screen
 {
 public:
-	FoosballScreen(Vector2 screenSize, Game* game);
+	FoosballScreen(Vector2 screenSize, Game* game, Table* table, Opponent* opponent, Player* player);
+	~FoosballScreen();
 	virtual void Update(const float& elapsedTime);
 	virtual void Render();
 	virtual void touchEvent(Touch::TouchEvent evt, int x, int y, unsigned int contactIndex);
@@ -24,6 +27,9 @@ public:
 
 	void StartRound();
 	void SwoopLogo(int milliseconds);
+	void ShowAds();
+	void PauseGame();
+	void ResumeGame();
 private:
 	Opponent* opponent;
 	Player* player;
@@ -31,7 +37,9 @@ private:
 	MyCamera* camera;
 	Announcer* announcer;
 
-	LogoSwoop* logoSwoop = NULL;
+	AdvertScreen* advertScreen = NULL;
+	Pause* pauseScreen = NULL;
+	Screen* childScreen;
 
 	//	bool gameRunning = false;
 	bool roundRunning = false;
@@ -40,7 +48,7 @@ private:
 	Game* game;
 
 	Scene* _scene;
-
+	Vector3 pauseVelocity;
 
 	static bool luaBinded;
 
